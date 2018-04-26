@@ -1,0 +1,65 @@
+\documentclass[onecolumn,10pt]{article}
+\linespread{1.3}
+\usepackage[margin=2cm]{geometry}
+
+\usepackage[utf8]{inputenc}
+\usepackage[spanish]{babel}
+\usepackage{tikz}
+\usepackage{subcaption} \usepackage{graphicx}
+\usepackage{amsmath} \usepackage{amssymb}
+\usepackage{xcolor}
+\usepackage{listings}
+\usepackage[normalem]{ulem}
+
+\bibliographystyle{apsrev4-1}
+
+\graphicspath{{./fig/}}
+
+\newcommand{\IDT}{\texttt{IDT}}
+\newcommand{\MMU}{\texttt{MMU}}
+\newcommand{\GDT}{\texttt{GDT}}
+\newcommand{\TSS}{\texttt{TSS}}
+\newcommand{\PD}{\texttt{PD}}
+
+\begin{document}
+
+\title{Trabajo Práctico 1: Base de Datos}
+
+\author{Sueiro Diego, Somodi Pablo, Rodriguez Ignacio, Alvarez Lautaro}
+
+\date{\today}
+
+\maketitle
+
+
+\newpage
+
+\tableofcontents
+
+\newpage
+
+\section{Introducción}
+
+\newpage
+
+\section{Modelo Entidad Relación}
+
+\textbf{locacion}(\underline{idLocacion}, nombre, ubicacion, precio) \\
+\textbf{evento}(\underline{idLocacion}, \dashuline{cuitEmpresa}, fechaInicio, fechaFin) \\
+\textbf{parque}(\underline{idLocacion}) \\
+\textbf{empresa}(\underline{cuitEmpresa}, razonSocial, direccion, provincia, pais) \\
+\textbf{atraccion}(\underline{idAtraccion}, \dashuline{idLocacion}, nombre, precio, minimoEdad, minimoAltura) \\
+\textbf{categoria}(\underline{idCategoria}, nombre, valorX, valorY) \\
+\textbf{descuentoEnLocacion}(\underline{idCategoria, idLocacion}, porcentaje) \\
+\textbf{descuentoEnAtraccion}(\underline{idCategoria, idAtraccion}, porcentaje) \\
+\textbf{tarjeta}(\underline{numeroTarjeta}, \dashuline{dni}, \dashuline{idCategoria}, foto) \\
+\textbf{cliente}(\underline{dni}, nombre, apellido, direccion, telefono, \dashuline{idModoDePago}) \\
+\textbf{clienteTuvoTarjeta}(\underline{numeroTarjeta}, \dashuline{dni}, fechaInicio) \\
+\textbf{tarjetaTuvoCategoria}(\underline{numeroTarjeta, idCategoria, fechaDesde}) \\
+\textbf{modoDePago}(\underline{idModoDePago}, nombre) \\
+\textbf{factura}(\underline{numeroFactura}, \dashuline{dni}, fecha, monto, estado, fechaVencimiento) \\
+\textbf{entrada}(\underline{idEntrada}, \dashuline{dni}, \dashuline{numeroTarjeta}, fecha, precio) \\
+\textbf{entradaALocacion}(\underline{idEntrada}, \dashuline{idLocacion}) \\
+\textbf{entradaAAtraccion}(\underline{idEntrada}, \dashuline{idAtraccion}) \\
+
+\end{document}
