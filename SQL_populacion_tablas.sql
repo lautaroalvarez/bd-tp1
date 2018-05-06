@@ -82,6 +82,14 @@ INSERT INTO Cliente values (32333444, 'Agustín', 'Sánchez', 'Libertador 1431, 
 -- Tarjeta
 -- numero_de_tarjeta, dni, id_categoria, foto_path ('//srv/img/$id_tarjeta.png')
 
+INSERT INTO Tarjeta values (1, 13241345, 1, '//srv/img/1.png');
+INSERT INTO Tarjeta values (2, 24356543, 2, '//srv/img/1.png');
+INSERT INTO Tarjeta values (3, 32333444, 3, '//srv/img/1.png');
+INSERT INTO Tarjeta values (4, 13241345, 1, '//srv/img/1.png');
+INSERT INTO Tarjeta values (5, 13241345, 1, '//srv/img/1.png');
+INSERT INTO Tarjeta values (6, 13241345, 1, '//srv/img/1.png');
+
+
 -- Cliente Tuvo Tarjeta
 -- numero_de_tarjeta, dni, fecha_desde
 
