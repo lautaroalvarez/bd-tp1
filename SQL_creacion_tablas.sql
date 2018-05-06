@@ -172,19 +172,21 @@ CREATE TABLE Entrada_A_Atraccion (
   PRIMARY KEY (id_entrada)
 );
 
-/*
-SELECT 'CREATING STORED PROCEDURES' AS 'INFO';
+
+/*SELECT 'CREATING STORED PROCEDURES' AS 'INFO';
 
 -- Listado de inscriptos por cada categoria
 DELIMITER //
 CREATE PROCEDURE atraccionMasFacturo()
 	BEGIN
 	select atr1.nombre from Atraccion atr1 where not exists( 
-		select 1 from Atraccion atr2, Entrada_A_Atraccion e , Factura f where 
-			atr2.id_atraccion=e.id_atraccion and e.id_entrada=f.id_entrada
+		select 1 from Atraccion atr2, Entrada_A_Atraccion entrada1 , Factura factura1 where 
+			atr2.id_atraccion=entrada1.id_atraccion and entrada1.numero_de_factura=factura1.numero_de_factura and factura1.estado='F' group by id_atraccion having
+				sum(factura1.monto) > (select sum(factura2.monto) from Entrada_A_Atraccion entrada1 , Factura factura1 where
+					
 	END //
 DELIMITER ;
-
+/*
 SELECT 'CREATING TRIGGERS' as 'INFO';
 
   -- Esto se hace para que el ; no sea delimitador de statements y corte el procedure
