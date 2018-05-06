@@ -8,11 +8,11 @@ USE tp1;
 SELECT 'POPULATING DB' as 'INFO';
 
 
--- id_locacion, nombre, precio, ubicacion
-INSERT INTO Locacion values (1, 'Parque de la Costa', 100, 'Tigre');
-INSERT INTO Locacion values (2, 'Italpark', 1, 'CABA');
-INSERT INTO Locacion values (3, 'Loolapalusa', 10000, 'San Isidro');
-INSERT INTO Locacion values (4, 'Copa Libertadores', 400, 'CABA');
+-- id_locacion, nombre, precio, ubicacion, tipo
+INSERT INTO Locacion values (1, 'Parque de la Costa', 100, 'Tigre', 'P');
+INSERT INTO Locacion values (2, 'Italpark', 1, 'CABA', 'P');
+INSERT INTO Locacion values (3, 'Loolapalusa', 10000, 'San Isidro', 'T');
+INSERT INTO Locacion values (4, 'Copa Libertadores', 400, 'CABA', 'T');
 
 
 -- cuit_empresa, razon_social, direccion, provincia, pais
@@ -25,11 +25,6 @@ insert into Empresa values (33417743159, 'Productora Los Gallegos ', 'Monteagudo
 insert into Evento values (3, 20314457769, '2008-07-04','2008-07-05' );
 insert into Evento values (4, 20344561703, '2008-10-04','2008-10-05' );
 
-
-insert into Parque values (1);
-insert into Parque values (2);
-
-
 -- id_atraccion, id_locaion, nombre, precio, minimo_edad, minimo_altura
 
 INSERT INTO Atraccion values (1, 1,  'Tazas Locas', 50, 10, 140);
@@ -41,29 +36,29 @@ INSERT INTO Atraccion values (4, 2,  'Twister', 40, 7, 90);
 -- id_categoria, nombre, valorx, valory
 
 
-INSERT INTO Categoria values (1, "Gold", 400, 35); 
-INSERT INTO Categoria values (2, "Platinum", 1500, 150); 
-INSERT INTO Categoria values (3, "Black", 2800, 250); 
+INSERT INTO Categoria values (1, "Gold", 400, 35);
+INSERT INTO Categoria values (2, "Platinum", 1500, 150);
+INSERT INTO Categoria values (3, "Black", 2800, 250);
 
 
 -- id_categoria, id_locacion, porcentaje
 
-INSERT INTO Descuento_En_Locacion values (2, 1, 25); 
-INSERT INTO Descuento_En_Locacion values (2, 2, 50); 
-INSERT INTO Descuento_En_Locacion values (3, 4, 15); 
+INSERT INTO Descuento_En_Locacion values (2, 1, 25);
+INSERT INTO Descuento_En_Locacion values (2, 2, 50);
+INSERT INTO Descuento_En_Locacion values (3, 4, 15);
 INSERT INTO Descuento_En_Locacion values (3, 3, 30);
-INSERT INTO Descuento_En_Locacion values (3, 2, 70);  
+INSERT INTO Descuento_En_Locacion values (3, 2, 70);
 
 
 
-INSERT INTO Descuento_En_Atraccion values (2, 1, 10); 
-INSERT INTO Descuento_En_Atraccion values (2, 2, 10); 
-INSERT INTO Descuento_En_Atraccion values (2, 3, 10); 
-INSERT INTO Descuento_En_Atraccion values (2, 4, 10); 
-INSERT INTO Descuento_En_Atraccion values (3, 1, 30); 
-INSERT INTO Descuento_En_Atraccion values (3, 2, 30); 
-INSERT INTO Descuento_En_Atraccion values (3, 3, 30); 
-INSERT INTO Descuento_En_Atraccion values (3, 4, 30); 
+INSERT INTO Descuento_En_Atraccion values (2, 1, 10);
+INSERT INTO Descuento_En_Atraccion values (2, 2, 10);
+INSERT INTO Descuento_En_Atraccion values (2, 3, 10);
+INSERT INTO Descuento_En_Atraccion values (2, 4, 10);
+INSERT INTO Descuento_En_Atraccion values (3, 1, 30);
+INSERT INTO Descuento_En_Atraccion values (3, 2, 30);
+INSERT INTO Descuento_En_Atraccion values (3, 3, 30);
+INSERT INTO Descuento_En_Atraccion values (3, 4, 30);
 
 
 INSERT INTO Modo_De_Pago values (1, 'Efectivo');
