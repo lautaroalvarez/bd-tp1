@@ -20,9 +20,8 @@
 
 \section{Modelo Entidad Relación}
 
-\textbf{locacion}(\underline{idLocacion}, nombre, ubicacion, precio) \\
+\textbf{locacion}(\underline{idLocacion}, nombre, ubicacion, precio,tipo) \\
 \textbf{evento}(\underline{idLocacion}, \dashuline{cuitEmpresa}, fechaInicio, fechaFin) \\
-\textbf{parque}(\underline{idLocacion}) \\
 \textbf{empresa}(\underline{cuitEmpresa}, razonSocial, direccion, provincia, pais) \\
 \textbf{atraccion}(\underline{idAtraccion}, \dashuline{idLocacion}, nombre, precio, minimoEdad, minimoAltura) \\
 \textbf{categoria}(\underline{idCategoria}, nombre, valorX, valorY) \\
@@ -34,7 +33,7 @@
 \textbf{tarjetaTuvoCategoria}(\underline{numeroTarjeta, idCategoria, fechaDesde}) \\
 \textbf{modoDePago}(\underline{idModoDePago}, nombre) \\
 \textbf{factura}(\underline{numeroFactura}, \dashuline{dni}, fecha, monto, estado, fechaVencimiento) \\
-\textbf{entrada}(\underline{idEntrada}, \dashuline{dni}, \dashuline{numeroTarjeta}, fecha, precio) \\
+\textbf{entrada}(\underline{idEntrada}, \dashuline{dni}, \dashuline{numeroTarjeta}, \dashuline{numeroFactura}, fecha, precio) \\
 \textbf{entradaALocacion}(\underline{idEntrada}, \dashuline{idLocacion}) \\
 \textbf{entradaAAtraccion}(\underline{idEntrada}, \dashuline{idAtraccion}) \\
 

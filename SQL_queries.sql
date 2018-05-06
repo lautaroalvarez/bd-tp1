@@ -1,9 +1,9 @@
 -- Queries BEGIN
 
-USE tp1_mundial_tk;
+USE tp1;
 
 
-
+/*
 SELECT '1 - Obteniendo inscriptos por categoria (id 2)' AS 'INFO';
 CALL inscriptosPorCategoria(2);
 
@@ -48,3 +48,4 @@ CALL equiposPorPais(1);
 
 
 
+*/

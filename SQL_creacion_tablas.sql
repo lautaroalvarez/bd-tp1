@@ -12,6 +12,7 @@ CREATE TABLE Locacion (
   nombre VARCHAR(255),
   precio INTEGER NOT NULL,
   ubicacion VARCHAR(255),
+  tipo VARCHAR(1),
   PRIMARY KEY (id_locacion),
   UNIQUE (nombre)
 );
@@ -38,11 +39,6 @@ CREATE TABLE Evento (
   FOREIGN KEY (cuit_empresa) REFERENCES Empresa (cuit_empresa)
 );
 
-CREATE TABLE Parque (
-  id_locacion INTEGER NOT NULL,
-  PRIMARY KEY (id_locacion),
-  FOREIGN KEY (id_locacion) REFERENCES Locacion (id_locacion)
-);
 
 
 CREATE TABLE Atraccion (
@@ -141,7 +137,7 @@ CREATE TABLE Factura (
   dni INTEGER NOT NULL,
   fecha DATE NOT NULL,
   monto DECIMAL(64,2) NOT NULL,
-  estado VARCHAR(255) NOT NULL,
+  estado VARCHAR(1) NOT NULL,-- 'A'  abierta, 'F' facturada
   fecha_de_vencimiento DATE NOT NULL,
   FOREIGN KEY (dni) REFERENCES Cliente (dni),
   PRIMARY KEY (numero_de_factura)
@@ -151,10 +147,12 @@ CREATE TABLE Entrada (
   id_entrada INTEGER NOT NULL,
   dni INTEGER NOT NULL,
   numero_de_tarjeta INTEGER NOT NULL,
+  numero_de_factura INTEGER NOT NULL,
   fecha DATE NOT NULL,
   precio DECIMAL(64,2) NOT NULL,
   FOREIGN KEY (dni) REFERENCES Cliente (dni),
   FOREIGN KEY (numero_de_tarjeta) REFERENCES Tarjeta (numero_de_tarjeta),
+  FOREIGN KEY (numero_de_factura) REFERENCES Factura (numero_de_factura),
   PRIMARY KEY (id_entrada)
 );
 
@@ -174,9 +172,21 @@ CREATE TABLE Entrada_A_Atraccion (
   PRIMARY KEY (id_entrada)
 );
 
+/*
+SELECT 'CREATING STORED PROCEDURES' AS 'INFO';
+
+-- Listado de inscriptos por cada categoria
+DELIMITER //
+CREATE PROCEDURE atraccionMasFacturo()
+	BEGIN
+	select atr1.nombre from Atraccion atr1 where not exists( 
+		select 1 from Atraccion atr2, Entrada_A_Atraccion e , Factura f where 
+			atr2.id_atraccion=e.id_atraccion and e.id_entrada=f.id_entrada
+	END //
+DELIMITER ;
 
 SELECT 'CREATING TRIGGERS' as 'INFO';
-/*
+
   -- Esto se hace para que el ; no sea delimitador de statements y corte el procedure
 DELIMITER //
 CREATE TRIGGER IncluirTipoArbitro AFTER INSERT ON Arbitro
