@@ -9,7 +9,7 @@ SELECT 'CREATING DATABASE STRUCTURE' AS 'INFO';
 
 CREATE TABLE Locacion (
   id_locacion INTEGER NOT NULL,
-  nombre VARCHAR(255),
+  nombre VARCHAR(100),
   precio INTEGER NOT NULL,
   ubicacion VARCHAR(255),
   tipo VARCHAR(1),
@@ -17,11 +17,9 @@ CREATE TABLE Locacion (
   UNIQUE (nombre)
 );
 
-
-
 CREATE TABLE Empresa (
   cuit_empresa BIGINT NOT NULL,
-  razon_social VARCHAR(255) NOT NULL,
+  razon_social VARCHAR(100) NOT NULL,
   direccion VARCHAR(255) NOT NULL,
   provincia VARCHAR(255) NOT NULL,
   pais VARCHAR(255) NOT NULL,
@@ -39,12 +37,10 @@ CREATE TABLE Evento (
   FOREIGN KEY (cuit_empresa) REFERENCES Empresa (cuit_empresa)
 );
 
-
-
 CREATE TABLE Atraccion (
   id_atraccion INTEGER NOT NULL,
   id_locacion INTEGER NOT NULL,
-  nombre VARCHAR(255) NOT NULL,
+  nombre VARCHAR(100) NOT NULL,
   precio INTEGER NOT NULL,
   minimo_edad INTEGER NOT NULL,
   minimo_altura INTEGER NOT NULL,
@@ -55,13 +51,12 @@ CREATE TABLE Atraccion (
 
 CREATE TABLE Categoria (
   id_categoria INTEGER NOT NULL,
-  nombre VARCHAR(255) NOT NULL,
+  nombre VARCHAR(100) NOT NULL,
   valor_x INTEGER NOT NULL,
   valor_y INTEGER NOT NULL,
   PRIMARY KEY (id_categoria),
   UNIQUE (nombre)
 );
-
 
 CREATE TABLE Descuento_En_Locacion (
   id_categoria INTEGER NOT NULL,
@@ -72,7 +67,6 @@ CREATE TABLE Descuento_En_Locacion (
   PRIMARY KEY (id_categoria, id_locacion)
 );
 
-
 CREATE TABLE Descuento_En_Atraccion (
   id_categoria INTEGER NOT NULL,
   id_atraccion INTEGER NOT NULL,
@@ -82,10 +76,9 @@ CREATE TABLE Descuento_En_Atraccion (
   PRIMARY KEY (id_categoria, id_atraccion)
 );
 
-
 CREATE TABLE Modo_De_Pago (
   id_modo_de_pago INTEGER NOT NULL,
-  nombre VARCHAR(255) NOT NULL,
+  nombre VARCHAR(100) NOT NULL,
   PRIMARY KEY (id_modo_de_pago),
   UNIQUE (nombre)
 );
@@ -95,49 +88,40 @@ CREATE TABLE Cliente (
   nombre VARCHAR(255) NOT NULL,
   apellido VARCHAR(255) NOT NULL,
   direccion VARCHAR(255) NOT NULL,
-  telefono INTEGER NOT NULL,
+  telefono VARCHAR(255) NOT NULL,
   id_modo_de_pago INTEGER NOT NULL,
+  fecha_alta DATETIME NOT NULL,
   FOREIGN KEY (id_modo_de_pago) REFERENCES Modo_De_Pago (id_modo_de_pago),
   PRIMARY KEY (dni)
 );
-
 
 CREATE TABLE Tarjeta (
   numero_de_tarjeta INTEGER NOT NULL,
   dni INTEGER NOT NULL,
   id_categoria INTEGER NOT NULL,
   foto_path VARCHAR(255) NOT NULL,
+  estado VARCHAR(255) NOT NULL,
+  fecha_alta DATETIME NOT NULL,
   FOREIGN KEY (dni) REFERENCES Cliente (dni),
   FOREIGN KEY (id_categoria) REFERENCES Categoria (id_categoria),
   PRIMARY KEY (numero_de_tarjeta)
 );
 
-
-CREATE TABLE Cliente_Tuvo_Tarjeta (
-  numero_de_tarjeta INTEGER NOT NULL,
-  dni INTEGER NOT NULL,
-  fecha_desde DATE NOT NULL,
-  FOREIGN KEY (numero_de_tarjeta) REFERENCES Tarjeta (numero_de_tarjeta),
-  FOREIGN KEY (dni) REFERENCES Cliente (dni),
-  PRIMARY KEY (numero_de_tarjeta, dni)
-);
-
 CREATE TABLE Tarjeta_Tuvo_Categoria (
   numero_de_tarjeta INTEGER NOT NULL,
   id_categoria INTEGER NOT NULL,
-  fecha_desde DATE NOT NULL,
+  fecha_desde DATETIME NOT NULL,
   FOREIGN KEY (numero_de_tarjeta) REFERENCES Tarjeta (numero_de_tarjeta),
   FOREIGN KEY (id_categoria) REFERENCES Categoria (id_categoria),
   PRIMARY KEY (numero_de_tarjeta, id_categoria, fecha_desde)
 );
-
 
 CREATE TABLE Factura (
   numero_de_factura INTEGER NOT NULL,
   dni INTEGER NOT NULL,
   fecha DATE NOT NULL,
   monto DECIMAL(64,2) NOT NULL,
-  estado VARCHAR(1) NOT NULL,-- 'A'  abierta, 'F' facturada
+  estado VARCHAR(1) NOT NULL,-- 'P' Paga, 'I' Inpaga
   fecha_de_vencimiento DATE NOT NULL,
   FOREIGN KEY (dni) REFERENCES Cliente (dni),
   PRIMARY KEY (numero_de_factura)
@@ -147,15 +131,14 @@ CREATE TABLE Entrada (
   id_entrada INTEGER NOT NULL,
   dni INTEGER NOT NULL,
   numero_de_tarjeta INTEGER NOT NULL,
-  numero_de_factura INTEGER NOT NULL,
-  fecha DATE NOT NULL,
+  fecha DATETIME NOT NULL,
   precio DECIMAL(64,2) NOT NULL,
+  numero_de_factura INTEGER,
   FOREIGN KEY (dni) REFERENCES Cliente (dni),
   FOREIGN KEY (numero_de_tarjeta) REFERENCES Tarjeta (numero_de_tarjeta),
   FOREIGN KEY (numero_de_factura) REFERENCES Factura (numero_de_factura),
   PRIMARY KEY (id_entrada)
 );
-
 
 CREATE TABLE Entrada_A_Locacion (
   id_entrada INTEGER NOT NULL,
@@ -164,7 +147,6 @@ CREATE TABLE Entrada_A_Locacion (
   PRIMARY KEY (id_entrada)
 );
 
-
 CREATE TABLE Entrada_A_Atraccion (
   id_entrada INTEGER NOT NULL,
   id_atraccion INTEGER NOT NULL,
@@ -172,212 +154,40 @@ CREATE TABLE Entrada_A_Atraccion (
   PRIMARY KEY (id_entrada)
 );
 
-
-/*SELECT 'CREATING STORED PROCEDURES' AS 'INFO';
-
--- Listado de inscriptos por cada categoria
-DELIMITER //
-CREATE PROCEDURE atraccionMasFacturo()
-	BEGIN
-	select atr1.nombre from Atraccion atr1 where not exists( 
-		select 1 from Atraccion atr2, Entrada_A_Atraccion entrada1 , Factura factura1 where 
-			atr2.id_atraccion=entrada1.id_atraccion and entrada1.numero_de_factura=factura1.numero_de_factura and factura1.estado='F' group by id_atraccion having
-				sum(factura1.monto) > (select sum(factura2.monto) from Entrada_A_Atraccion entrada1 , Factura factura1 where
-					
-	END //
-DELIMITER ;
-/*
-SELECT 'CREATING TRIGGERS' as 'INFO';
-
-  -- Esto se hace para que el ; no sea delimitador de statements y corte el procedure
-DELIMITER //
-CREATE TRIGGER IncluirTipoArbitro AFTER INSERT ON Arbitro
-FOR EACH ROW
-BEGIN
-  IF NEW.tipo='Juez' THEN
-    INSERT INTO Juez (id_arbitro) VALUES (NEW.id_arbitro);
-  ELSEIF NEW.tipo='Central' THEN
-    INSERT INTO Central (id_arbitro) VALUES (NEW.id_arbitro);
-  ELSEIF NEW.tipo='PresidenteDeMesadeMesa' THEN
-    INSERT INTO PresidenteDeMesa (id_arbitro) VALUES (NEW.id_arbitro);
-  ELSE
-    INSERT INTO Suplente (id_arbitro) VALUES (NEW.id_arbitro);
-  END IF;
-END;
-//
-
-DELIMITER ;
-
--- Creacion de trigger END
-
 SELECT 'CREATING STORED PROCEDURES' AS 'INFO';
 
--- Listado de inscriptos por cada categoria
+-- Empresa organizadora de eventos que tuvo mayor facturacion
 DELIMITER //
-CREATE PROCEDURE inscriptosPorCategoria(IN idCategoria INTEGER)
+CREATE PROCEDURE empresaMasFacturo()
 	BEGIN
-	SELECT cidor.DNI, cidor.nombre, cidor.apellido FROM Inscripcion AS ins,
-		Competencia AS ccia, Competidor AS cidor, Categoria AS cat
-			WHERE ins.id_competencia = ccia.id_competencia AND
-			cidor.id_competidor = ins.id_competidor AND
-			ccia.id_categoria = cat.id_categoria AND
-			cat.id_categoria = idCategoria;
+  SELECT ev.id_locacion, em.cuit_empresa, em.razon_social, SUM(en.precio) facturacion
+    FROM Empresa as em, Evento as ev, Entrada_A_Locacion as el, Entrada as en
+    WHERE em.cuit_empresa = ev.cuit_empresa AND el.id_locacion = ev.id_locacion AND en.id_entrada = el.id_entrada
+    GROUP BY em.cuit_empresa
+    LIMIT 0, 1;
 	END //
 DELIMITER ;
 
--- Pais con mayor cantidad de medallas de oro
+-- Ranking de parques/atracciones con mayor cantidad de visitas en rango de fechas
 DELIMITER //
-CREATE PROCEDURE paisesConMasMedallasOro()
+CREATE PROCEDURE rankingParquesAtracciones(IN fecha_desde VARCHAR(10), IN fecha_hasta VARCHAR(10))
 	BEGIN
-  SELECT p.nombre from Pais AS p WHERE p.id_pais IN 
-  (SELECT co.id_pais FROM Competencia AS c
-  INNER JOIN Competidor AS co ON c.primer_puesto = co.id_competidor
-  GROUP BY co.id_pais
-  ORDER BY COUNT(*) DESC)
-  LIMIT 1;
+  (
+    SELECT 'Parque' as tipo, l.nombre as nombre, COUNT(el.id_entrada) visitas
+      FROM Locacion as l, Entrada as en, Entrada_A_Locacion as el
+      WHERE l.tipo = 'P' AND el.id_locacion = l.id_locacion AND en.id_entrada = el.id_entrada AND en.fecha > fecha_desde AND en.fecha < fecha_hasta
+      GROUP BY l.id_locacion
+      LIMIT 0, 5
+  )
+  UNION
+  (
+    SELECT 'Atraccion' as tipo, a.nombre as nombre, COUNT(ea.id_entrada) visitas
+      FROM Atraccion as a, Entrada as en, Entrada_A_Atraccion as ea
+      WHERE ea.id_atraccion = a.id_atraccion AND en.id_entrada = ea.id_entrada AND en.fecha > fecha_desde AND en.fecha < fecha_hasta
+      GROUP BY a.id_atraccion
+      LIMIT 0, 5
+  )
+    ORDER BY visitas
+    DESC LIMIT 0, 5;
 	END //
 DELIMITER ;
-
--- Pais con mayor cantidad de medallas de plata
-DELIMITER //
-CREATE PROCEDURE paisesConMasMedallasPlata()
-	BEGIN
-  SELECT p.nombre from Pais AS p WHERE p.id_pais IN 
-  (SELECT co.id_pais FROM Competencia AS c
-  INNER JOIN Competidor AS co ON c.segundo_puesto = co.id_competidor
-  GROUP BY co.id_pais
-  ORDER BY COUNT(*) DESC)
-  LIMIT 1;
-	END //
-DELIMITER ;
-
--- Pais con mayor cantidad de medallas de bronce
-DELIMITER //
-CREATE PROCEDURE paisesConMasMedallasBronce()
-	BEGIN
-  SELECT p.nombre from Pais AS p WHERE p.id_pais IN 
-  (SELECT co.id_pais FROM Competencia AS c
-  INNER JOIN Competidor AS co ON c.tercer_puesto = co.id_competidor
-  GROUP BY co.id_pais
-  ORDER BY COUNT(*) DESC)
-  LIMIT 1;
-	END //
-DELIMITER ;
-
--- Ranking por pais
-DELIMITER //
-CREATE PROCEDURE rankingPorPais()
-BEGIN
-SELECT p.nombre as 'Pais', q.oro as 'Oro', q.plata as 'Plata', q.bronce as 'Bronce' FROM
-  (SELECT m.id_pais,
-    SUM(IF(c.primer_puesto IS NULL, 0, 3)) AS oro,
-    SUM(IF(c.segundo_puesto IS NULL, 0, 2)) AS plata,
-    SUM(IF(c.tercer_puesto IS NULL, 0, 1)) AS bronce
-    FROM Competencia c, Inscripcion i, Maestro m
-    WHERE c.id_competencia = i.id_competencia AND i.id_maestro = m.id_maestro
-    GROUP BY m.id_pais) q
-    INNER JOIN Pais p ON q.id_pais = p.id_pais
-    ORDER BY q.oro DESC;
-  END //
-DELIMITER ;
-
--- Ranking por escuela
-DELIMITER //
-CREATE PROCEDURE rankingPorEscuela()
-BEGIN
-SELECT p.nombre as 'Pais', q.oro as 'Oro', q.plata as 'Plata', q.bronce as 'Bronce' FROM
-  (SELECT m.id_escuela,
-    SUM(IF(c.primer_puesto IS NULL, 0, 3)) AS oro,
-    SUM(IF(c.segundo_puesto IS NULL, 0, 2)) AS plata,
-    SUM(IF(c.tercer_puesto IS NULL, 0, 1)) AS bronce
-    FROM Competencia c, Inscripcion i, Maestro m
-    WHERE c.id_competencia = i.id_competencia AND i.id_maestro = m.id_maestro
-    GROUP BY m.id_escuela) q
-    INNER JOIN Escuela p ON q.id_escuela = p.id_escuela
-    ORDER BY q.oro DESC;
-  END //
-DELIMITER ;
-
--- Medallero por escuela
-DELIMITER //
-CREATE PROCEDURE medalleroPorEscuela(IN idEscuela INTEGER)
-  BEGIN
-  SELECT * FROM Competidor AS c, Competencia as co
-  WHERE c.id_competidor IN (co.primer_puesto, co.segundo_puesto, co.tercer_puesto)
-  AND c.id_escuela = idEscuela;
-  END //
-DELIMITER ;
-
--- Listado de arbitros por pais.
-DELIMITER //
-CREATE PROCEDURE arbitrosPorPais(IN idPais INTEGER)
-  BEGIN
-  SELECT * FROM Arbitro AS a WHERE a.id_pais = idPais;
-  END //
-DELIMITER ;
-
--- Lista de todos los arbitros que actuaron como arbitro central en la categoria Combate
-DELIMITER //
-CREATE PROCEDURE arbitrosCentralesEnModalidad(IN tipo VARCHAR(20))
-  BEGIN
-  SELECT a.nombre, a.apellido FROM Arbitro AS a
-  INNER JOIN Central ar ON a.id_arbitro = ar.id_arbitro
-  INNER JOIN Dirige AS d ON a.id_arbitro = d.id_arbitro
-  INNER JOIN Competencia AS c ON d.id_competencia = c.id_competencia
-  INNER JOIN Modalidad AS m ON c.id_modalidad = m.id_modalidad
-  WHERE m.nombre = tipo;
-  END //
-DELIMITER ;
-
--- Lista de equipos por pais
-DELIMITER //
-CREATE PROCEDURE equiposPorPais(IN idPais INTEGER)
-  BEGIN
-  SELECT DISTINCT e.nombre FROM Equipo AS e
-  INNER JOIN Competidor c ON c.id_equipo_titular = e.id_equipo
-  WHERE c.id_pais = idPais;
-  END //
-DELIMITER ;
-
-
--- Lista de equipos por pais
-DELIMITER //
-CREATE PROCEDURE medallasPorCompetidor(IN idCompetidor INTEGER)
-BEGIN
-select distinct idCompetidor, Competencia.id_competencia,
-      CASE 
-         WHEN idCompetidor = Competencia.primer_puesto THEN 'Primero'
-         WHEN idCompetidor = Competencia.segundo_puesto THEN 'Segundo'
-         WHEN idCompetidor = Competencia.tercer_puesto THEN 'Tercero'
-      END as Puesto,
-      Categoria.genero, Categoria.rango_edad, Categoria.rango_peso
-	from Competidor, Competencia , Inscripcion, Categoria where 
-Competidor.id_competidor = Inscripcion.id_competidor and 
-Inscripcion.id_competencia = Competencia.id_competencia and 
-Categoria.id_categoria = Competencia.id_categoria and 
-(Competencia.primer_puesto = idCompetidor or Competencia.segundo_puesto = idCompetidor or Competencia.tercer_puesto = idCompetidor);
-  END //
-DELIMITER ;
-
-
-DELIMITER //
-CREATE PROCEDURE medallasPorEscuela(IN idEscuela INTEGER)
-BEGIN
-select Competidor.id_competidor, Competencia.id_competencia,
-      CASE 
-         WHEN Competidor.id_competidor = Competencia.primer_puesto THEN 'Primero'
-         WHEN Competidor.id_competidor = Competencia.segundo_puesto THEN 'Segundo'
-         WHEN Competidor.id_competidor = Competencia.tercer_puesto THEN 'Tercero'
-      END as Puesto,
-      Categoria.genero, Categoria.rango_edad, Categoria.rango_peso
-  from Competidor, Competencia , Inscripcion, Categoria WHERE
-Competidor.id_escuela = idEscuela AND
- Competidor.id_competidor = Inscripcion.id_competidor AND 
- Inscripcion.id_competencia = Competencia.id_competencia AND 
- Categoria.id_categoria = Competencia.id_categoria AND 
-(Competencia.primer_puesto = Competidor.id_competidor OR Competencia.segundo_puesto = Competidor.id_competidor or Competencia.tercer_puesto = Competidor.id_competidor);
-  END //
-DELIMITER ;
-
-
-*/
