@@ -1,190 +1,182 @@
 -- Reset de los schemas
-DROP DATABASE IF EXISTS tp1_mundial_tk;
-CREATE DATABASE IF NOT EXISTS tp1_mundial_tk;
-USE tp1_mundial_tk;
+DROP DATABASE IF EXISTS tp1;
+CREATE DATABASE IF NOT EXISTS tp1;
+USE tp1;
 
 SELECT 'CREATING DATABASE STRUCTURE' AS 'INFO';
 
 -- Creacion de tablas BEGIN
 
-CREATE TABLE Pais (
-  id_pais INTEGER NOT NULL,
-  nombre VARCHAR(20),
-  PRIMARY KEY (id_pais),
-  UNIQUE (nombre)
-);
-
-CREATE TABLE Escuela (
-  id_escuela INTEGER NOT NULL,
-  nombre VARCHAR(20) NOT NULL,
-  PRIMARY KEY (id_escuela),
-  UNIQUE (nombre)
-);
-
-CREATE TABLE Graduacion (
-  id_graduacion INTEGER NOT NULL,
-  dan INTEGER NOT NULL,
-  CONSTRAINT danValido CHECK (dan BETWEEN 1 AND 6),
-  PRIMARY KEY (id_graduacion)
-);
-
-CREATE TABLE Maestro (
-  id_maestro INTEGER NOT NULL,
-  nombre VARCHAR(255) NOT NULL,
-  apellido VARCHAR(255) NOT NULL,
-  placa INTEGER NOT NULL,
-  id_pais INTEGER NOT NULL,
-  id_escuela INTEGER NOT NULL,
-  id_graduacion INTEGER NOT NULL,
-  FOREIGN KEY (id_pais) REFERENCES Pais (id_pais),
-  FOREIGN KEY (id_escuela) REFERENCES Escuela (id_escuela),
-  FOREIGN KEY (id_graduacion) REFERENCES Graduacion (id_graduacion),
-  PRIMARY KEY (id_maestro),
-  UNIQUE (placa)
-);
-
-CREATE TABLE Arbitro (
-  id_arbitro INTEGER NOT NULL,
-  nombre VARCHAR(255) NOT NULL,
-  apellido VARCHAR(255) NOT NULL,
-  tipo ENUM('Juez', 'Presidente de Mesa', 'Suplente', 'Central'),
-  placa INTEGER NOT NULL,
-  id_pais INTEGER NOT NULL,
-  id_graduacion INTEGER NOT NULL,
-  FOREIGN KEY (id_pais) REFERENCES Pais (id_pais),
-  FOREIGN KEY (id_graduacion) REFERENCES Graduacion (id_graduacion),
-  PRIMARY KEY (id_arbitro),
-  UNIQUE (placa)
-);
-
-CREATE TABLE PresidenteDeMesa (
-  id_arbitro INTEGER NOT NULL,
-  FOREIGN KEY (id_arbitro) REFERENCES Arbitro (id_arbitro),
-  PRIMARY KEY (id_arbitro) 
-);
-
-CREATE TABLE Juez (
-  id_arbitro INTEGER NOT NULL,
-  FOREIGN KEY (id_arbitro) REFERENCES Arbitro (id_arbitro)
-);
-
-CREATE TABLE Central (
-  id_arbitro INTEGER NOT NULL,
-  FOREIGN KEY (id_arbitro) REFERENCES Arbitro (id_arbitro)
-);
-
-CREATE TABLE Suplente (
-  id_arbitro INTEGER NOT NULL,
-  FOREIGN KEY (id_arbitro) REFERENCES Arbitro (id_arbitro)
-);
-
-CREATE TABLE Equipo (
-  id_equipo INTEGER NOT NULL,
-  nombre VARCHAR(20),
-  PRIMARY KEY (id_equipo),
-  UNIQUE (nombre)
-);
-
-CREATE TABLE Coach (
-  id_coach INTEGER NOT NULL,
+CREATE TABLE Locacion (
+  id_locacion INTEGER NOT NULL,
   nombre VARCHAR(255),
-  apellido VARCHAR(255),
-  fecha_nacimiento DATE NOT NULL,
-  numero_certificado INTEGER NOT NULL,
-  foto VARCHAR(255),
-  id_graduacion INTEGER NOT NULL,
-  id_escuela INTEGER NOT NULL,
-  id_equipo INTEGER NOT NULL,
-  FOREIGN KEY (id_graduacion) REFERENCES Graduacion (id_graduacion),
-  FOREIGN KEY (id_escuela) REFERENCES Escuela (id_escuela),
-  FOREIGN KEY (id_equipo) REFERENCES Equipo (id_equipo), -- para mi un competidor esta solo en un equipo
-  PRIMARY KEY (id_coach),
-  UNIQUE (numero_certificado)
+  precio INTEGER NOT NULL,
+  ubicacion VARCHAR(255),
+  PRIMARY KEY (id_locacion),
+  UNIQUE (nombre)
 );
 
-CREATE TABLE Competidor (
-  id_competidor INTEGER NOT NULL,
+
+
+CREATE TABLE Empresa (
+  cuit_empresa BIGINT NOT NULL,
+  razon_social VARCHAR(255) NOT NULL,
+  direccion VARCHAR(255) NOT NULL,
+  provincia VARCHAR(255) NOT NULL,
+  pais VARCHAR(255) NOT NULL,
+  PRIMARY KEY (cuit_empresa),
+  UNIQUE (razon_social)
+);
+
+CREATE TABLE Evento (
+  id_locacion INTEGER NOT NULL,
+  cuit_empresa BIGINT NOT NULL,
+  fecha_inicio DATE NOT NULL,
+  fecha_fin DATE NOT NULL,
+  PRIMARY KEY (id_locacion),
+  FOREIGN KEY (id_locacion) REFERENCES Locacion (id_locacion),
+  FOREIGN KEY (cuit_empresa) REFERENCES Empresa (cuit_empresa)
+);
+
+CREATE TABLE Parque (
+  id_locacion INTEGER NOT NULL,
+  PRIMARY KEY (id_locacion),
+  FOREIGN KEY (id_locacion) REFERENCES Locacion (id_locacion)
+);
+
+
+CREATE TABLE Atraccion (
+  id_atraccion INTEGER NOT NULL,
+  id_locacion INTEGER NOT NULL,
   nombre VARCHAR(255) NOT NULL,
-  apellido VARCHAR(255) NOT NULL,
-  DNI VARCHAR(20) NOT NULL,
-  fecha_nacimiento DATE NOT NULL,
-  numero_certificado INTEGER NOT NULL,
-  genero ENUM('M', 'F'),
-  foto VARCHAR(255),
-  id_graduacion INTEGER NOT NULL,
-  id_escuela INTEGER NOT NULL,
-  id_equipo_titular INTEGER,
-  id_equipo_suplente INTEGER,
-  id_coach INTEGER NOT NULL,
-  id_pais INTEGER NOT NULL,
-  FOREIGN KEY (id_graduacion) REFERENCES Graduacion (id_graduacion),
-  FOREIGN KEY (id_escuela) REFERENCES Escuela (id_escuela),
-  FOREIGN KEY (id_equipo_titular) REFERENCES Equipo (id_equipo), -- para mi un competidor esta solo en un equipo
-  FOREIGN KEY (id_equipo_suplente) REFERENCES Equipo (id_equipo),
-  FOREIGN KEY (id_coach) REFERENCES Coach (id_coach),
-  FOREIGN KEY (id_pais) REFERENCES Pais (id_pais),
-  PRIMARY KEY (id_competidor),
-  UNIQUE (DNI),
-  UNIQUE (numero_certificado)
-);
-
--- falta coach que tambien puede ser un competidor!
-
-CREATE TABLE Modalidad (
-  id_modalidad INTEGER NOT NULL,
-  nombre VARCHAR(20) NOT NULL,
-  PRIMARY KEY (id_modalidad),
+  precio INTEGER NOT NULL,
+  minimo_edad INTEGER NOT NULL,
+  minimo_altura INTEGER NOT NULL,
+  PRIMARY KEY (id_atraccion),
+  FOREIGN KEY (id_locacion) REFERENCES Locacion (id_locacion),
   UNIQUE (nombre)
 );
 
 CREATE TABLE Categoria (
   id_categoria INTEGER NOT NULL,
-  genero ENUM('M', 'F'),
-  rango_edad VARCHAR(255),
-  rango_peso VARCHAR(255),
-  PRIMARY KEY (id_categoria)
+  nombre VARCHAR(255) NOT NULL,
+  valor_x INTEGER NOT NULL,
+  valor_y INTEGER NOT NULL,
+  PRIMARY KEY (id_categoria),
+  UNIQUE (nombre)
 );
 
--- faltan las clases hijas de categoria, pero todavia no se si quedaba cambiar algo de esa parte...
 
-CREATE TABLE Competencia (
-  id_competencia INTEGER NOT NULL,
-  id_graduacion INTEGER, -- podemos no tener una graduacion
+CREATE TABLE Descuento_En_Locacion (
   id_categoria INTEGER NOT NULL,
-  id_modalidad INTEGER NOT NULL,
-  primer_puesto INTEGER,
-  segundo_puesto INTEGER,
-  tercer_puesto INTEGER,
-  FOREIGN KEY (primer_puesto) REFERENCES Competidor (id_competidor),
-  FOREIGN KEY (segundo_puesto) REFERENCES Competidor (id_competidor),
-  FOREIGN KEY (tercer_puesto) REFERENCES Competidor (id_competidor),
-  FOREIGN KEY (id_modalidad) REFERENCES Modalidad (id_modalidad),
-  PRIMARY KEY (id_competencia)
+  id_locacion INTEGER NOT NULL,
+  porcentaje INTEGER NOT NULL,
+  FOREIGN KEY (id_categoria) REFERENCES Categoria (id_categoria),
+  FOREIGN KEY (id_locacion) REFERENCES Locacion (id_locacion),
+  PRIMARY KEY (id_categoria, id_locacion)
 );
 
-CREATE TABLE Dirige (
-  id_arbitro INTEGER NOT NULL,
-  id_competencia INTEGER NOT NULL,
-  FOREIGN KEY (id_arbitro) REFERENCES Arbitro (id_arbitro),
-  FOREIGN KEY (id_competencia) REFERENCES Competencia (id_competencia),
-  PRIMARY KEY (id_arbitro, id_competencia)
+
+CREATE TABLE Descuento_En_Atraccion (
+  id_categoria INTEGER NOT NULL,
+  id_atraccion INTEGER NOT NULL,
+  porcentaje INTEGER NOT NULL,
+  FOREIGN KEY (id_categoria) REFERENCES Categoria (id_categoria),
+  FOREIGN KEY (id_atraccion) REFERENCES Atraccion (id_atraccion),
+  PRIMARY KEY (id_categoria, id_atraccion)
 );
 
--- De la ternaria Inscribe
-CREATE TABLE Inscripcion (
-  id_competencia INTEGER NOT NULL,
-  id_maestro INTEGER NOT NULL,
-  id_competidor INTEGER NOT NULL,
-  fecha_alta DATE NOT NULL,
-  -- faltaba algo mas?
-  FOREIGN KEY (id_competencia) REFERENCES Competencia (id_competencia),
-  FOREIGN KEY (id_maestro) REFERENCES Maestro (id_maestro),
-  FOREIGN KEY (id_competidor) REFERENCES Competidor (id_competidor),
-  PRIMARY KEY (id_competencia, id_maestro, id_competidor)
+
+CREATE TABLE Modo_De_Pago (
+  id_modo_de_pago INTEGER NOT NULL,
+  nombre VARCHAR(255) NOT NULL,
+  PRIMARY KEY (id_modo_de_pago),
+  UNIQUE (nombre)
 );
+
+CREATE TABLE Cliente (
+  dni INTEGER NOT NULL,
+  nombre VARCHAR(255) NOT NULL,
+  apellido VARCHAR(255) NOT NULL,
+  direccion VARCHAR(255) NOT NULL,
+  telefono INTEGER NOT NULL,
+  id_modo_de_pago INTEGER NOT NULL,
+  FOREIGN KEY (id_modo_de_pago) REFERENCES Modo_De_Pago (id_modo_de_pago),
+  PRIMARY KEY (dni)
+);
+
+
+CREATE TABLE Tarjeta (
+  numero_de_tarjeta INTEGER NOT NULL,
+  dni INTEGER NOT NULL,
+  id_categoria INTEGER NOT NULL,
+  foto_path VARCHAR(255) NOT NULL,
+  FOREIGN KEY (dni) REFERENCES Cliente (dni),
+  FOREIGN KEY (id_categoria) REFERENCES Categoria (id_categoria),
+  PRIMARY KEY (numero_de_tarjeta)
+);
+
+
+CREATE TABLE Cliente_Tuvo_Tarjeta (
+  numero_de_tarjeta INTEGER NOT NULL,
+  dni INTEGER NOT NULL,
+  fecha_desde DATE NOT NULL,
+  FOREIGN KEY (numero_de_tarjeta) REFERENCES Tarjeta (numero_de_tarjeta),
+  FOREIGN KEY (dni) REFERENCES Cliente (dni),
+  PRIMARY KEY (numero_de_tarjeta, dni)
+);
+
+CREATE TABLE Tarjeta_Tuvo_Categoria (
+  numero_de_tarjeta INTEGER NOT NULL,
+  id_categoria INTEGER NOT NULL,
+  fecha_desde DATE NOT NULL,
+  FOREIGN KEY (numero_de_tarjeta) REFERENCES Tarjeta (numero_de_tarjeta),
+  FOREIGN KEY (id_categoria) REFERENCES Categoria (id_categoria),
+  PRIMARY KEY (numero_de_tarjeta, id_categoria, fecha_desde)
+);
+
+
+CREATE TABLE Factura (
+  numero_de_factura INTEGER NOT NULL,
+  dni INTEGER NOT NULL,
+  fecha DATE NOT NULL,
+  monto DECIMAL(64,2) NOT NULL,
+  estado VARCHAR(255) NOT NULL,
+  fecha_de_vencimiento DATE NOT NULL,
+  FOREIGN KEY (dni) REFERENCES Cliente (dni),
+  PRIMARY KEY (numero_de_factura)
+);
+
+CREATE TABLE Entrada (
+  id_entrada INTEGER NOT NULL,
+  dni INTEGER NOT NULL,
+  numero_de_tarjeta INTEGER NOT NULL,
+  fecha DATE NOT NULL,
+  precio DECIMAL(64,2) NOT NULL,
+  FOREIGN KEY (dni) REFERENCES Cliente (dni),
+  FOREIGN KEY (numero_de_tarjeta) REFERENCES Tarjeta (numero_de_tarjeta),
+  PRIMARY KEY (id_entrada)
+);
+
+
+CREATE TABLE Entrada_A_Locacion (
+  id_entrada INTEGER NOT NULL,
+  id_locacion INTEGER NOT NULL,
+  FOREIGN KEY (id_locacion) REFERENCES Locacion (id_locacion),
+  PRIMARY KEY (id_entrada)
+);
+
+
+CREATE TABLE Entrada_A_Atraccion (
+  id_entrada INTEGER NOT NULL,
+  id_atraccion INTEGER NOT NULL,
+  FOREIGN KEY (id_atraccion) REFERENCES Atraccion (id_atraccion),
+  PRIMARY KEY (id_entrada)
+);
+
 
 SELECT 'CREATING TRIGGERS' as 'INFO';
-
+/*
   -- Esto se hace para que el ; no sea delimitador de statements y corte el procedure
 DELIMITER //
 CREATE TRIGGER IncluirTipoArbitro AFTER INSERT ON Arbitro
@@ -376,3 +368,4 @@ Competidor.id_escuela = idEscuela AND
 DELIMITER ;
 
 
+*/
