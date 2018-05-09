@@ -12,7 +12,7 @@ CREATE TABLE Locacion (
   nombre VARCHAR(100),
   precio INTEGER NOT NULL,
   ubicacion VARCHAR(255),
-  tipo VARCHAR(1),
+  tipo VARCHAR(1), -- 'P'/'E'
   PRIMARY KEY (id_locacion),
   UNIQUE (nombre)
 );
@@ -155,7 +155,55 @@ CREATE TABLE Entrada_A_Atraccion (
 );
 
 SELECT 'CREATING STORED PROCEDURES' AS 'INFO';
+-- Atraccion que mas facturo
+DELIMITER //
+CREATE PROCEDURE atraccionMasFacturo()
+	BEGIN
+	select atr1.nombre from Atraccion atr1 where not exists( 
+		select 1 from Atraccion AS atr2, Entrada_A_Atraccion AS entrada1 , Factura AS factura1 where 
+			atr2.id_atraccion=entrada1.id_atraccion and entrada1.numero_de_factura=factura1.numero_de_factura and factura1.estado='P' group by id_atraccion having
+				sum(factura1.monto) > (select sum(factura2.monto) from Entrada_A_Atraccion AS entrada2 , Factura AS factura2 where 
+					atr1.id_atraccion=entrada1.id_atraccion and entrada2.numero_de_factura=factura2.numero_de_factura and factura2.estado='P'));
+	END //
+DELIMITER ;
 
+-- Parque que mas facturo XX
+DELIMITER //
+CREATE PROCEDURE parqueMasFacturo()
+	BEGIN
+	select par1.nombre from Locacion par1 where par1.tipo='P' and not exists( 
+		select 1 from Locacion par2, Entrada_A_Locacion entradaL1, Entrada_A_Atraccion entradaA1 , Atraccion atr1,Factura factura1 where 
+			((par2.id_locacion=entradaL1.id_locacion and entradaL1.numero_de_factura=factura1.numero_de_factura) or (entradaA1.id_atraccion=atr1.id_atraccion and entradaA1.numero_de_factura=factura1.numero_de_factura and atr1.id_locacion=par2.id_locacion )) and factura1.estado='P' group by id_atraccion having
+				sum(factura1.monto) > (select sum(factura2.monto) from Atraccion atr2,Entrada_A_Locacion entradaL2,Entrada_A_Atraccion entradaA2 , Factura factura2 where 
+					((par1.id_locacion=entradaL1.id_locacion and entradaL1.numero_de_factura=factura1.numero_de_factura) or (entradaA1.id_atraccion=atr1.id_atraccion and entradaA1.numero_de_factura=factura1.numero_de_factura and atr1.id_locacion=par1.id_locacion )) and factura2.estado='P'));
+	END //
+DELIMITER ;
+
+
+-- Atraccion que mas facturo por parque XX
+DELIMITER //
+CREATE PROCEDURE atraccionMasFacturoPorParque()
+	BEGIN
+	
+	END //
+DELIMITER ;
+-- Facturas adeudadas
+
+DELIMITER //
+CREATE PROCEDURE facturasAdeudadas()
+	BEGIN
+	SELECT * FROM Facturas where  estado='I';
+	END //
+DELIMITER ;
+
+-- Atracciones mas visitadas por cliente en rango de fecha XX
+
+DELIMITER //
+CREATE PROCEDURE atraccionesPorCliente(IN fechaInicio DATE, IN fechaFin DATE)
+	BEGIN
+	
+	END //
+DELIMITER ;
 -- Empresa organizadora de eventos que tuvo mayor facturacion
 DELIMITER //
 CREATE PROCEDURE empresaMasFacturo()
