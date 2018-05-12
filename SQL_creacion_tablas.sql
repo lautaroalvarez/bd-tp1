@@ -51,11 +51,12 @@ CREATE TABLE Atraccion (
 
 CREATE TABLE Categoria (
   id_categoria INTEGER NOT NULL,
+  orden INTEGER NOT NULL,
   nombre VARCHAR(100) NOT NULL,
   valor_x INTEGER NOT NULL,
   valor_y INTEGER NOT NULL,
   PRIMARY KEY (id_categoria),
-  UNIQUE (nombre)
+  UNIQUE (nombre, orden)
 );
 
 CREATE TABLE Descuento_En_Locacion (
@@ -91,29 +92,29 @@ CREATE TABLE Cliente (
   telefono VARCHAR(255) NOT NULL,
   id_modo_de_pago INTEGER NOT NULL,
   fecha_alta DATETIME NOT NULL,
+  id_categoria INTEGER NOT NULL,
   FOREIGN KEY (id_modo_de_pago) REFERENCES Modo_De_Pago (id_modo_de_pago),
+  FOREIGN KEY (id_categoria) REFERENCES Categoria (id_categoria),
   PRIMARY KEY (dni)
+);
+
+CREATE TABLE Cliente_Tuvo_Categoria (
+  dni INTEGER NOT NULL,
+  id_categoria INTEGER NOT NULL,
+  fecha_desde DATETIME NOT NULL,
+  FOREIGN KEY (dni) REFERENCES Cliente (dni),
+  FOREIGN KEY (id_categoria) REFERENCES Categoria (id_categoria),
+  PRIMARY KEY (dni, id_categoria, fecha_desde)
 );
 
 CREATE TABLE Tarjeta (
   numero_de_tarjeta INTEGER NOT NULL,
   dni INTEGER NOT NULL,
-  id_categoria INTEGER NOT NULL,
   foto_path VARCHAR(255) NOT NULL,
   estado VARCHAR(255) NOT NULL,
   fecha_alta DATETIME NOT NULL,
   FOREIGN KEY (dni) REFERENCES Cliente (dni),
-  FOREIGN KEY (id_categoria) REFERENCES Categoria (id_categoria),
   PRIMARY KEY (numero_de_tarjeta)
-);
-
-CREATE TABLE Tarjeta_Tuvo_Categoria (
-  numero_de_tarjeta INTEGER NOT NULL,
-  id_categoria INTEGER NOT NULL,
-  fecha_desde DATETIME NOT NULL,
-  FOREIGN KEY (numero_de_tarjeta) REFERENCES Tarjeta (numero_de_tarjeta),
-  FOREIGN KEY (id_categoria) REFERENCES Categoria (id_categoria),
-  PRIMARY KEY (numero_de_tarjeta, id_categoria, fecha_desde)
 );
 
 CREATE TABLE Factura (
@@ -159,10 +160,10 @@ SELECT 'CREATING STORED PROCEDURES' AS 'INFO';
 DELIMITER //
 CREATE PROCEDURE atraccionMasFacturo()
 	BEGIN
-	select atr1.nombre from Atraccion atr1 where not exists( 
-		select 1 from Atraccion AS atr2, Entrada_A_Atraccion AS entrada1 , Factura AS factura1 where 
+	select atr1.nombre from Atraccion atr1 where not exists(
+		select 1 from Atraccion AS atr2, Entrada_A_Atraccion AS entrada1 , Factura AS factura1 where
 			atr2.id_atraccion=entrada1.id_atraccion and entrada1.numero_de_factura=factura1.numero_de_factura and factura1.estado='P' group by id_atraccion having
-				sum(factura1.monto) > (select sum(factura2.monto) from Entrada_A_Atraccion AS entrada2 , Factura AS factura2 where 
+				sum(factura1.monto) > (select sum(factura2.monto) from Entrada_A_Atraccion AS entrada2 , Factura AS factura2 where
 					atr1.id_atraccion=entrada1.id_atraccion and entrada2.numero_de_factura=factura2.numero_de_factura and factura2.estado='P'));
 	END //
 DELIMITER ;
@@ -171,10 +172,10 @@ DELIMITER ;
 DELIMITER //
 CREATE PROCEDURE parqueMasFacturo()
 	BEGIN
-	select par1.nombre from Locacion par1 where par1.tipo='P' and not exists( 
-		select 1 from Locacion par2, Entrada_A_Locacion entradaL1, Entrada_A_Atraccion entradaA1 , Atraccion atr1,Factura factura1 where 
+	select par1.nombre from Locacion par1 where par1.tipo='P' and not exists(
+		select 1 from Locacion par2, Entrada_A_Locacion entradaL1, Entrada_A_Atraccion entradaA1 , Atraccion atr1,Factura factura1 where
 			((par2.id_locacion=entradaL1.id_locacion and entradaL1.numero_de_factura=factura1.numero_de_factura) or (entradaA1.id_atraccion=atr1.id_atraccion and entradaA1.numero_de_factura=factura1.numero_de_factura and atr1.id_locacion=par2.id_locacion )) and factura1.estado='P' group by id_atraccion having
-				sum(factura1.monto) > (select sum(factura2.monto) from Atraccion atr2,Entrada_A_Locacion entradaL2,Entrada_A_Atraccion entradaA2 , Factura factura2 where 
+				sum(factura1.monto) > (select sum(factura2.monto) from Atraccion atr2,Entrada_A_Locacion entradaL2,Entrada_A_Atraccion entradaA2 , Factura factura2 where
 					((par1.id_locacion=entradaL1.id_locacion and entradaL1.numero_de_factura=factura1.numero_de_factura) or (entradaA1.id_atraccion=atr1.id_atraccion and entradaA1.numero_de_factura=factura1.numero_de_factura and atr1.id_locacion=par1.id_locacion )) and factura2.estado='P'));
 	END //
 DELIMITER ;
@@ -184,7 +185,7 @@ DELIMITER ;
 DELIMITER //
 CREATE PROCEDURE atraccionMasFacturoPorParque()
 	BEGIN
-	
+
 	END //
 DELIMITER ;
 -- Facturas adeudadas
@@ -201,9 +202,10 @@ DELIMITER ;
 DELIMITER //
 CREATE PROCEDURE atraccionesPorCliente(IN fechaInicio DATE, IN fechaFin DATE)
 	BEGIN
-	
+
 	END //
 DELIMITER ;
+
 -- Empresa organizadora de eventos que tuvo mayor facturacion
 DELIMITER //
 CREATE PROCEDURE empresaMasFacturo()

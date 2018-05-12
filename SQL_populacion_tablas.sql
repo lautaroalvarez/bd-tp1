@@ -28,11 +28,11 @@ INSERT INTO Atraccion values (2, 1,  'Samba', 20, 8, 110);
 INSERT INTO Atraccion values (3, 2,  'Autitos Chocadores', 60, 6, 100);
 INSERT INTO Atraccion values (4, 2,  'Twister', 40, 7, 90);
 
--- id_categoria, nombre, valorx, valory
-INSERT INTO Categoria values (1, "Basica", 0, 0);
-INSERT INTO Categoria values (2, "Gold", 400, 35);
-INSERT INTO Categoria values (3, "Platinum", 1500, 150);
-INSERT INTO Categoria values (4, "Black", 2800, 250);
+-- id_categoria, orden, nombre, valorx, valory
+INSERT INTO Categoria values (1, 1, "Basica", 0, 0);
+INSERT INTO Categoria values (2, 2, "Gold", 400, 35);
+INSERT INTO Categoria values (3, 3, "Platinum", 1500, 150);
+INSERT INTO Categoria values (4, 4, "Black", 2800, 250);
 
 -- id_categoria, id_locacion, porcentaje
 INSERT INTO Descuento_En_Locacion values (2, 1, 25);
@@ -56,31 +56,28 @@ INSERT INTO Modo_De_Pago values (1, 'Efectivo');
 INSERT INTO Modo_De_Pago values (2, 'Debito Automatico');
 INSERT INTO Modo_De_Pago values (3, 'Pagomiscuentas');
 
--- dni, nombre, apelido, direccion, telefono, id_modo_de_pago
-INSERT INTO Cliente values (13241345, 'Juan', 'García', 'Calle Falsa 123, CABA', '4444-4444', 1, '2017-01-15 20:30:00');
-INSERT INTO Cliente values (24356543, 'Roberto', 'Pérez', 'Cangallo 4000, CABA', '5555-5555', 3, '2017-01-17 15:45:00');
-INSERT INTO Cliente values (32333444, 'Agustín', 'Sánchez', 'Libertador 1431, CABA', '4545-4545', 1, '2017-01-17 19:20:00');
-INSERT INTO Cliente values (28123456, 'Fabiana', 'Fernandez', 'Av Siempreviva 742', '011 1234-5678', 2, '2018-03-15 09:20:00');
+-- dni, nombre, apelido, direccion, telefono, id_modo_de_pago, fecha_alta, id_categoria
+INSERT INTO Cliente values (13241345, 'Juan', 'García', 'Calle Falsa 123, CABA', '4444-4444', 1, '2017-01-15 20:30:00', 2);
+INSERT INTO Cliente values (24356543, 'Roberto', 'Pérez', 'Cangallo 4000, CABA', '5555-5555', 3, '2017-01-17 15:45:00', 3);
+INSERT INTO Cliente values (32333444, 'Agustín', 'Sánchez', 'Libertador 1431, CABA', '4545-4545', 1, '2017-01-17 19:20:00', 1);
+INSERT INTO Cliente values (28123456, 'Fabiana', 'Fernandez', 'Av Siempreviva 742', '011 1234-5678', 2, '2018-03-15 09:20:00', 1);
 
--- numero_de_tarjeta, dni, id_categoria, foto_path ('//srv/img/$id_tarjeta.png'),
-INSERT INTO Tarjeta values (1, 13241345, 1, '//srv/img/1.png', 'Inactiva', '2017-01-15 20:30:00');
-INSERT INTO Tarjeta values (2, 24356543, 3, '//srv/img/2.png', 'Activa', '2017-01-17 15:45:00');
-INSERT INTO Tarjeta values (3, 32333444, 1, '//srv/img/3.png', 'Activa', '2017-01-17 19:20:00');
-INSERT INTO Tarjeta values (4, 13241345, 2, '//srv/img/4.png', 'Inactiva', '2017-01-20 08:45:00');
-INSERT INTO Tarjeta values (5, 13241345, 2, '//srv/img/5.png', 'Inactiva', '2017-03-15 15:30:00');
-INSERT INTO Tarjeta values (6, 13241345, 2, '//srv/img/6.png', 'Activa', '2017-05-01 22:05:00');
-INSERT INTO Tarjeta values (7, 28123456, 1, '//srv/img/7.png', 'Activa', '2018-03-15 09:20:00');
+-- dni, id_categoria, fecha_desde
+INSERT INTO Cliente_Tuvo_Categoria values (13241345, 1, '2017-01-15 22:30:00');
+INSERT INTO Cliente_Tuvo_Categoria values (24356543, 1, '2017-01-17 15:45:00');
+INSERT INTO Cliente_Tuvo_Categoria values (32333444, 3, '2017-01-17 19:20:00');
+INSERT INTO Cliente_Tuvo_Categoria values (13241345, 2, '2017-03-01 09:00:00');
+INSERT INTO Cliente_Tuvo_Categoria values (24356543, 3, '2017-05-01 09:00:00');
+INSERT INTO Cliente_Tuvo_Categoria values (28123456, 1, '2018-03-15 09:20:00');
 
--- numero_de_tarjeta, id_categoria, fecha_desde
-INSERT INTO Tarjeta_Tuvo_Categoria values (1, 1, '2017-01-15 22:30:00');
-INSERT INTO Tarjeta_Tuvo_Categoria values (2, 1, '2017-01-17 15:45:00');
-INSERT INTO Tarjeta_Tuvo_Categoria values (3, 3, '2017-01-17 19:20:00');
-INSERT INTO Tarjeta_Tuvo_Categoria values (4, 1, '2017-01-20 08:45:00');
-INSERT INTO Tarjeta_Tuvo_Categoria values (4, 2, '2017-03-01 09:00:00');
-INSERT INTO Tarjeta_Tuvo_Categoria values (5, 2, '2017-03-15 15:30:00');
-INSERT INTO Tarjeta_Tuvo_Categoria values (2, 3, '2017-05-01 09:00:00');
-INSERT INTO Tarjeta_Tuvo_Categoria values (6, 2, '2017-05-01 22:05:00');
-INSERT INTO Tarjeta_Tuvo_Categoria values (7, 1, '2018-03-15 09:20:00');
+-- numero_de_tarjeta, dni, foto_path ('//srv/img/$id_tarjeta.png'),
+INSERT INTO Tarjeta values (1, 13241345, '//srv/img/1.png', 'Inactiva', '2017-01-15 20:30:00');
+INSERT INTO Tarjeta values (2, 24356543, '//srv/img/2.png', 'Activa', '2017-01-17 15:45:00');
+INSERT INTO Tarjeta values (3, 32333444, '//srv/img/3.png', 'Activa', '2017-01-17 19:20:00');
+INSERT INTO Tarjeta values (4, 13241345, '//srv/img/4.png', 'Inactiva', '2017-01-20 08:45:00');
+INSERT INTO Tarjeta values (5, 13241345, '//srv/img/5.png', 'Inactiva', '2017-03-15 15:30:00');
+INSERT INTO Tarjeta values (6, 13241345, '//srv/img/6.png', 'Activa', '2017-05-01 22:05:00');
+INSERT INTO Tarjeta values (7, 28123456, '//srv/img/7.png', 'Activa', '2018-03-15 09:20:00');
 
 -- numero_de_factura, dni, fecha, monto, estado, fecha_de_vencimiento
 INSERT INTO Factura values (1, 13241345, '2017-02-01', 210, 'P', '2017-02-17');
