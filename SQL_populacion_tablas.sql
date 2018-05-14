@@ -29,10 +29,10 @@ INSERT INTO Atraccion values (3, 2,  'Autitos Chocadores', 60, 6, 100);
 INSERT INTO Atraccion values (4, 2,  'Twister', 40, 7, 90);
 
 -- id_categoria, orden, nombre, valorx, valory
-INSERT INTO Categoria values (1, 1, "Basica", 0, 0);
-INSERT INTO Categoria values (2, 2, "Gold", 400, 35);
-INSERT INTO Categoria values (3, 3, "Platinum", 1500, 150);
-INSERT INTO Categoria values (4, 4, "Black", 2800, 250);
+INSERT INTO Categoria values (1, 1, "Basica", 400, 0);
+INSERT INTO Categoria values (2, 2, "Gold", 1500, 35);
+INSERT INTO Categoria values (3, 3, "Platinum", 2800, 150);
+INSERT INTO Categoria values (4, 4, "Black", 0, 250);
 
 -- id_categoria, id_locacion, porcentaje
 INSERT INTO Descuento_En_Locacion values (2, 1, 25);

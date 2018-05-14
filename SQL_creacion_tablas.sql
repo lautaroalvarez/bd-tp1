@@ -241,3 +241,77 @@ CREATE PROCEDURE rankingParquesAtracciones(IN fecha_desde VARCHAR(10), IN fecha_
     DESC LIMIT 0, 5;
 	END //
 DELIMITER ;
+
+-- Subida de categoría
+--    Sube al cliente de categoria
+DELIMITER //
+CREATE PROCEDURE subirCategoriaACliente(IN dniCliente INTEGER)
+	BEGIN
+    DECLARE idSiguienteCategoria INTEGER;
+    DECLARE ordenCategoriaActual INTEGER;
+    SELECT dniCliente 'El cliente sube de categoria';
+
+    SELECT ca.orden INTO ordenCategoriaActual
+      FROM Cliente_Tuvo_Categoria as ctc, Categoria as ca
+      WHERE ctc.dni = dniCliente AND ca.id_categoria = ctc.id_categoria
+      ORDER BY ctc.fecha_desde DESC
+      LIMIT 0, 1;
+
+    SELECT id_categoria INTO idSiguienteCategoria
+      FROM Categoria
+      WHERE orden > ordenCategoriaActual
+      ORDER BY orden ASC
+      LIMIT 0, 1;
+
+    IF idSiguienteCategoria THEN
+      UPDATE Cliente
+        SET id_categoria = idSiguienteCategoria
+        WHERE dni = dniCliente;
+      INSERT INTO Cliente_Tuvo_Categoria
+        SET dni = dniCliente, id_categoria = idSiguienteCategoria, fecha_desde = NOW();
+    END IF;
+	END //
+DELIMITER ;
+--    Analiza si un cliente debe subir de categoría
+DELIMITER //
+CREATE PROCEDURE verSiSubirCategoriaCliente(IN dniCliente INTEGER)
+	BEGIN
+    DECLARE debeSubir BOOLEAN;
+
+    SELECT ga.gastado_este_ano >= ca.valor_x INTO debeSubir
+      FROM
+      (
+        SELECT ctc.dni, ca.valor_x
+          FROM Cliente_Tuvo_Categoria as ctc, Categoria as ca
+          WHERE ctc.id_categoria = ca.id_categoria AND ctc.dni = dniCliente
+          ORDER BY ctc.fecha_desde DESC
+          LIMIT 0, 1
+      ) as ca,
+      (
+        SELECT dni, SUM(precio) gastado_este_ano
+          FROM Entrada
+          WHERE dni = dniCliente AND YEAR(fecha) = YEAR(NOW())
+      ) as ga
+      WHERE ca.dni = ga.dni;
+
+      IF debeSubir THEN
+        call subirCategoriaACliente(dniCliente);
+      END IF;
+	END //
+DELIMITER ;
+--    Analiza si los clientes deben subir de categoria
+DELIMITER //
+CREATE PROCEDURE verSiSubirCategoriaClientes()
+	BEGIN
+    DECLARE clienteActual INTEGER;
+    DECLARE dniClientes CURSOR FOR
+      SELECT dni FROM Cliente;
+
+    OPEN dniClientes;
+    recorrerClientes:
+      LOOP FETCH dniClientes INTO clienteActual;
+        call verSiSubirCategoriaCliente(clienteActual);
+      END LOOP recorrerClientes;
+    CLOSE dniClientes;
+	END //
+DELIMITER ;
