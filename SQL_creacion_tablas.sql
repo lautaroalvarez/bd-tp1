@@ -161,22 +161,22 @@ DELIMITER //
 CREATE PROCEDURE atraccionMasFacturo()
 	BEGIN
 	select atr1.nombre from Atraccion atr1 where not exists(
-		select 1 from Atraccion AS atr2, Entrada_A_Atraccion AS entrada1 , Factura AS factura1 where
-			atr2.id_atraccion=entrada1.id_atraccion and entrada1.numero_de_factura=factura1.numero_de_factura and factura1.estado='P' group by id_atraccion having
-				sum(factura1.monto) > (select sum(factura2.monto) from Entrada_A_Atraccion AS entrada2 , Factura AS factura2 where
-					atr1.id_atraccion=entrada1.id_atraccion and entrada2.numero_de_factura=factura2.numero_de_factura and factura2.estado='P'));
+		select 1 from Atraccion AS atr2, Entrada_A_Atraccion AS entrada1  where
+			atr2.id_atraccion=entrada1.id_atraccion group by id_atraccion having
+				sum(entrada1.precio) > (select sum(entrada2.precio) from Entrada_A_Atraccion AS entrada2 where
+					atr1.id_atraccion=entrada1.id_atraccion ));
 	END //
 DELIMITER ;
 
--- Parque que mas facturo XX
+-- Parque que mas facturo 
 DELIMITER //
 CREATE PROCEDURE parqueMasFacturo()
 	BEGIN
 	select par1.nombre from Locacion par1 where par1.tipo='P' and not exists(
-		select 1 from Locacion par2, Entrada_A_Locacion entradaL1, Entrada_A_Atraccion entradaA1 , Atraccion atr1,Factura factura1 where
-			((par2.id_locacion=entradaL1.id_locacion and entradaL1.numero_de_factura=factura1.numero_de_factura) or (entradaA1.id_atraccion=atr1.id_atraccion and entradaA1.numero_de_factura=factura1.numero_de_factura and atr1.id_locacion=par2.id_locacion )) and factura1.estado='P' group by id_atraccion having
-				sum(factura1.monto) > (select sum(factura2.monto) from Atraccion atr2,Entrada_A_Locacion entradaL2,Entrada_A_Atraccion entradaA2 , Factura factura2 where
-					((par1.id_locacion=entradaL1.id_locacion and entradaL1.numero_de_factura=factura1.numero_de_factura) or (entradaA1.id_atraccion=atr1.id_atraccion and entradaA1.numero_de_factura=factura1.numero_de_factura and atr1.id_locacion=par1.id_locacion )) and factura2.estado='P'));
+		select 1 from Locacion par2, Entrada_A_Locacion entrada1 where
+			par2.id_locacion=entradaL1.id_locacion group by id_locacion having
+				sum(entrada1.precio) > (select sum(entrada2.precio) from Atraccion atr2,Entrada_A_Locacion entrada2 where
+					par1.id_locacion=entrada2.id_locacion ));
 	END //
 DELIMITER ;
 
