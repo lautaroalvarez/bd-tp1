@@ -168,7 +168,7 @@ CREATE PROCEDURE atraccionMasFacturo()
 	END //
 DELIMITER ;
 
--- Parque que mas facturo 
+-- Parque que mas facturo
 DELIMITER //
 CREATE PROCEDURE parqueMasFacturo()
 	BEGIN
@@ -291,8 +291,7 @@ CREATE PROCEDURE verSiSubirCategoriaCliente(IN dniCliente INTEGER)
         SELECT dni, SUM(precio) gastado_este_ano
           FROM Entrada
           WHERE dni = dniCliente AND YEAR(fecha) = YEAR(NOW())
-      ) as ga
-      WHERE ca.dni = ga.dni;
+      ) as ga;
 
       IF debeSubir THEN
         call subirCategoriaACliente(dniCliente);
@@ -303,15 +302,98 @@ DELIMITER ;
 DELIMITER //
 CREATE PROCEDURE verSiSubirCategoriaClientes()
 	BEGIN
+    DECLARE done INT DEFAULT FALSE;
     DECLARE clienteActual INTEGER;
     DECLARE dniClientes CURSOR FOR
       SELECT dni FROM Cliente;
+    DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = TRUE;
 
     OPEN dniClientes;
-    recorrerClientes:
-      LOOP FETCH dniClientes INTO clienteActual;
-        call verSiSubirCategoriaCliente(clienteActual);
-      END LOOP recorrerClientes;
+    recorrerClientes: LOOP
+      FETCH dniClientes INTO clienteActual;
+      IF done THEN
+        LEAVE recorrerClientes;
+      END IF;
+      call verSiSubirCategoriaCliente(clienteActual);
+    END LOOP;
+    CLOSE dniClientes;
+	END //
+DELIMITER ;
+
+-- Bajada de categoría
+--    Baja al cliente de categoria
+DELIMITER //
+CREATE PROCEDURE bajarCategoriaACliente(IN dniCliente INTEGER)
+	BEGIN
+    DECLARE idCategoriaPrevia INTEGER;
+    DECLARE ordenCategoriaActual INTEGER;
+    SELECT dniCliente 'El cliente baja de categoria';
+
+    SELECT ca.orden INTO ordenCategoriaActual
+      FROM Cliente_Tuvo_Categoria as ctc, Categoria as ca
+      WHERE ctc.dni = dniCliente AND ca.id_categoria = ctc.id_categoria
+      ORDER BY ctc.fecha_desde DESC
+      LIMIT 0, 1;
+
+    SELECT id_categoria INTO idCategoriaPrevia
+      FROM Categoria
+      WHERE orden < ordenCategoriaActual
+      ORDER BY orden ASC
+      LIMIT 0, 1;
+
+    IF idCategoriaPrevia THEN
+      UPDATE Cliente
+        SET id_categoria = idCategoriaPrevia
+        WHERE dni = dniCliente;
+      INSERT INTO Cliente_Tuvo_Categoria
+        SET dni = dniCliente, id_categoria = idCategoriaPrevia, fecha_desde = NOW();
+    END IF;
+	END //
+DELIMITER ;
+--    Analiza si un cliente debe bajar de categoría
+DELIMITER //
+CREATE PROCEDURE verSiBajarCategoriaCliente(IN dniCliente INTEGER)
+	BEGIN
+    DECLARE debeSubir BOOLEAN;
+
+    SELECT (ga.gastado_ultimo_ano / 12) < ca.valor_y INTO debeSubir
+      FROM
+      (
+        SELECT ctc.dni, ca.valor_y
+          FROM Cliente_Tuvo_Categoria as ctc, Categoria as ca
+          WHERE ctc.id_categoria = ca.id_categoria AND ctc.dni = dniCliente
+          ORDER BY ctc.fecha_desde DESC
+          LIMIT 0, 1
+      ) as ca,
+      (
+        SELECT dni, SUM(precio) gastado_ultimo_ano
+          FROM Entrada
+          WHERE dni = dniCliente AND fecha >= DATE_SUB(NOW(), INTERVAL 1 YEAR)
+      ) as ga;
+
+      IF debeSubir THEN
+        call bajarCategoriaACliente(dniCliente);
+      END IF;
+	END //
+DELIMITER ;
+--    Analiza si los clientes deben bajar de categoria
+DELIMITER //
+CREATE PROCEDURE verSiBajarCategoriaClientes()
+	BEGIN
+    DECLARE done INT DEFAULT FALSE;
+    DECLARE clienteActual INTEGER;
+    DECLARE dniClientes CURSOR FOR
+      SELECT dni FROM Cliente;
+    DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = TRUE;
+
+    OPEN dniClientes;
+    recorrerClientes: LOOP
+      FETCH dniClientes INTO clienteActual;
+      IF done THEN
+        LEAVE recorrerClientes;
+      END IF;
+      call verSiBajarCategoriaCliente(clienteActual);
+    END LOOP;
     CLOSE dniClientes;
 	END //
 DELIMITER ;
