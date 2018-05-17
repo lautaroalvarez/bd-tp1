@@ -397,3 +397,12 @@ CREATE PROCEDURE verSiBajarCategoriaClientes()
     CLOSE dniClientes;
 	END //
 DELIMITER ;
+
+-- SP que reacomoda categoria de dniClientes
+DELIMITER //
+CREATE PROCEDURE reacomodarCategoriaClientes()
+	BEGIN
+    call verSiSubirCategoriaClientes();
+    call verSiBajarCategoriaClientes();
+	END //
+DELIMITER ;
