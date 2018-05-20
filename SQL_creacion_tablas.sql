@@ -163,9 +163,9 @@ CREATE PROCEDURE atraccionMasFacturo()
   BEGIN
   select atr1.nombre from Atraccion atr1 where not exists(
     select 1 from Atraccion atr2, Entrada_A_Atraccion entrada1,Entrada ent  where
-      atr2.id_atraccion=entrada1.id_atraccion and entrada1.id_entrada = ent.id_entrada group by id_atraccion having
+      atr2.id_atraccion=entrada1.id_atraccion and entrada1.id_entrada = ent.id_entrada group by atr2.id_atraccion having
         sum(ent.precio) > (select sum(ent2.precio) from Entrada_A_Atraccion  entrada2, Entrada ent2 where
-          atr1.id_atraccion=entrada1.id_atraccion and entrada2.id_entrada = ent2.id_entrada));
+          atr1.id_atraccion=entrada2.id_atraccion and entrada2.id_entrada = ent2.id_entrada));
   END //
 DELIMITER ;
 
@@ -173,11 +173,11 @@ DELIMITER ;
 DELIMITER //
 CREATE PROCEDURE parqueMasFacturo()
   BEGIN
-  select par1.nombre from Locacion par1 where par1.tipo='P' and not exists(
+  select par1.nombre from Locacion par1 where par1.tipo ='P' and not exists(
     select 1 from Locacion par2, Entrada_A_Locacion entrada1, Entrada ent where
-      par2.id_locacion=entrada1.id_locacion and entrada1.id_entrada = ent.id_entrada group by id_locacion having
+      par2.id_locacion=entrada1.id_locacion and entrada1.id_entrada = ent.id_entrada and par2.tipo ='P' group by par2.id_locacion having
         sum(ent.precio) > (select sum(ent2.precio) from Entrada_A_Locacion entrada2 , Entrada ent2 where
-          par1.id_locacion=entrada2.id_locacion and entrada2.id_entrada = ent2.id_entrada));
+          par1.id_locacion=entrada2.id_locacion and entrada2.id_entrada = ent2.id_entrada)) ;
   END //
 DELIMITER ;
 
@@ -188,8 +188,8 @@ CREATE PROCEDURE atraccionMasFacturoPorParque()
   BEGIN
     select par1.nombre,atr1.nombre from Locacion par1 ,Atraccion atr1 where par1.tipo='P' and par1.id_locacion=atr1.id_locacion and
       not exists(select 1 from Atraccion atr2, Entrada_A_Atraccion entrada1,Entrada ent where
-        atr1.id_locacion=atr2.id_locacion and  atr2.id_atraccion=entrada1.id_atraccion and entrada1.id_entrada = ent.id_entrada group by id_atraccion having
-          sum(ent.precio) > (select sum(entrada2.precio) from Entrada_A_Atraccion entrada2,Entrada ent2 where
+        atr1.id_locacion=atr2.id_locacion and  atr2.id_atraccion=entrada1.id_atraccion and entrada1.id_entrada = ent.id_entrada group by atr2.id_atraccion having
+          sum(ent.precio) > (select sum(ent2.precio) from Entrada_A_Atraccion entrada2,Entrada ent2 where
             atr1.id_atraccion=entrada2.id_atraccion and entrada2.id_entrada = ent2.id_entrada ));
   END //
 DELIMITER ;
@@ -210,7 +210,7 @@ CREATE PROCEDURE atraccionesPorCliente(IN fechaInicio DATE, IN fechaFin DATE)
     select cl.nombre, atr.nombre from Cliente cl, Atraccion atr where
       exists( select 1 from Entrada_A_Atraccion entradaA , Entrada entrada where entradaA.id_atraccion = atr.id_atraccion and entrada.id_entrada=entradaA.id_entrada and entrada.id_cliente=cl.id_cliente and entrada.fecha<=fechaFin and fechaInicio<=entrada.fecha ) 
         and not exists ( select 1 from Atraccion atr2, Entrada_A_Atraccion entrada1,Entrada ent where
-        atr1.id_locacion=atr2.id_locacion and  atr2.id_atraccion=entrada1.id_atraccion and entrada1.id_entrada = ent.id_entrada  and ent.fecha<=fechaFin and fechaInicio<=ent.fecha  group by id_atraccion having
+        atr1.id_locacion=atr2.id_locacion and  atr2.id_atraccion=entrada1.id_atraccion and entrada1.id_entrada = ent.id_entrada  and ent.fecha<=fechaFin and fechaInicio<=ent.fecha  group by atr2.id_atraccion having
           sum(ent.precio) > (select sum(entrada2.precio) from Entrada_A_Atraccion entrada2 ,Entrada ent2 where
             atr1.id_atraccion=entrada2.id_atraccion and entrada2.id_entrada = ent2.id_entrada  and ent2.fecha<=fechaFin and fechaInicio<=ent2.fecha ));
   END //
