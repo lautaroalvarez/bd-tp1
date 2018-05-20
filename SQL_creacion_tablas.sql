@@ -187,8 +187,8 @@ DELIMITER //
 CREATE PROCEDURE atraccionMasFacturoPorParque()
   BEGIN
     select par1.nombre,atr1.nombre from Locacion par1 ,Atraccion atr1 where par1.tipo='P' and par1.id_locacion=atr1.id_locacion and
-      not exits(select 1 from Atraccion atr2, Entrada_A_Atraccion entrada1,Entrada ent where
-        atr1.id_locacion=atr2.id_locacion and  atr2.id_atraccion=entrada1.id_atraccion and entrada1.id_entrada = ent.id_entrada agroup by id_atraccion having
+      not exists(select 1 from Atraccion atr2, Entrada_A_Atraccion entrada1,Entrada ent where
+        atr1.id_locacion=atr2.id_locacion and  atr2.id_atraccion=entrada1.id_atraccion and entrada1.id_entrada = ent.id_entrada group by id_atraccion having
           sum(ent.precio) > (select sum(entrada2.precio) from Entrada_A_Atraccion entrada2,Entrada ent2 where
             atr1.id_atraccion=entrada2.id_atraccion and entrada2.id_entrada = ent2.id_entrada ));
   END //
@@ -212,7 +212,7 @@ CREATE PROCEDURE atraccionesPorCliente(IN fechaInicio DATE, IN fechaFin DATE)
         and not exists ( select 1 from Atraccion atr2, Entrada_A_Atraccion entrada1,Entrada ent where
         atr1.id_locacion=atr2.id_locacion and  atr2.id_atraccion=entrada1.id_atraccion and entrada1.id_entrada = ent.id_entrada  and ent.fecha<=fechaFin and fechaInicio<=ent.fecha  group by id_atraccion having
           sum(ent.precio) > (select sum(entrada2.precio) from Entrada_A_Atraccion entrada2 ,Entrada ent2 where
-            atr1.id_atraccion=entrada2.id_atraccion and entrada2.id_entrada = ent2.id_entrada  and ent2.fecha<=fechaFin and fechaInicio<=ent2.fecha ))
+            atr1.id_atraccion=entrada2.id_atraccion and entrada2.id_entrada = ent2.id_entrada  and ent2.fecha<=fechaFin and fechaInicio<=ent2.fecha ));
   END //
 DELIMITER ;
 
@@ -220,19 +220,19 @@ DELIMITER ;
 -- Empresa organizadora de eventos que tuvo mayor facturacion
 DELIMITER //
 CREATE PROCEDURE empresaMasFacturo()
-	BEGIN
+  BEGIN
   SELECT ev.id_locacion, em.cuit_empresa, em.razon_social, SUM(en.precio) facturacion
     FROM Empresa as em, Evento as ev, Entrada_A_Locacion as el, Entrada as en
     WHERE em.cuit_empresa = ev.cuit_empresa AND el.id_locacion = ev.id_locacion AND en.id_entrada = el.id_entrada
     GROUP BY em.cuit_empresa
     LIMIT 0, 1;
-	END //
+  END //
 DELIMITER ;
 
 -- Ranking de parques/atracciones con mayor cantidad de visitas en rango de fechas
 DELIMITER //
 CREATE PROCEDURE rankingParquesAtracciones(IN fecha_desde VARCHAR(10), IN fecha_hasta VARCHAR(10))
-	BEGIN
+  BEGIN
   (
     SELECT 'Parque' as tipo, l.nombre as nombre, COUNT(el.id_entrada) visitas
       FROM Locacion as l, Entrada as en, Entrada_A_Locacion as el
@@ -250,14 +250,14 @@ CREATE PROCEDURE rankingParquesAtracciones(IN fecha_desde VARCHAR(10), IN fecha_
   )
     ORDER BY visitas
     DESC LIMIT 0, 5;
-	END //
+  END //
 DELIMITER ;
 
 -- Subida de categoría
 --    Sube al cliente de categoria
 DELIMITER //
 CREATE PROCEDURE subirCategoriaACliente(IN dniCliente INTEGER)
-	BEGIN
+  BEGIN
     DECLARE idSiguienteCategoria INTEGER;
     DECLARE ordenCategoriaActual INTEGER;
     SELECT dniCliente 'El cliente sube de categoria';
@@ -281,12 +281,12 @@ CREATE PROCEDURE subirCategoriaACliente(IN dniCliente INTEGER)
       INSERT INTO Cliente_Tuvo_Categoria
         SET dni = dniCliente, id_categoria = idSiguienteCategoria, fecha_desde = NOW();
     END IF;
-	END //
+  END //
 DELIMITER ;
 --    Analiza si un cliente debe subir de categoría
 DELIMITER //
 CREATE PROCEDURE verSiSubirCategoriaCliente(IN dniCliente INTEGER)
-	BEGIN
+  BEGIN
     DECLARE debeSubir BOOLEAN;
 
     SELECT ga.gastado_este_ano >= ca.valor_x INTO debeSubir
@@ -307,12 +307,12 @@ CREATE PROCEDURE verSiSubirCategoriaCliente(IN dniCliente INTEGER)
       IF debeSubir THEN
         call subirCategoriaACliente(dniCliente);
       END IF;
-	END //
+  END //
 DELIMITER ;
 --    Analiza si los clientes deben subir de categoria
 DELIMITER //
 CREATE PROCEDURE verSiSubirCategoriaClientes()
-	BEGIN
+  BEGIN
     DECLARE done INT DEFAULT FALSE;
     DECLARE clienteActual INTEGER;
     DECLARE dniClientes CURSOR FOR
@@ -328,14 +328,14 @@ CREATE PROCEDURE verSiSubirCategoriaClientes()
       call verSiSubirCategoriaCliente(clienteActual);
     END LOOP;
     CLOSE dniClientes;
-	END //
+  END //
 DELIMITER ;
 
 -- Bajada de categoría
 --    Baja al cliente de categoria
 DELIMITER //
 CREATE PROCEDURE bajarCategoriaACliente(IN dniCliente INTEGER)
-	BEGIN
+  BEGIN
     DECLARE idCategoriaPrevia INTEGER;
     DECLARE ordenCategoriaActual INTEGER;
     SELECT dniCliente 'El cliente baja de categoria';
@@ -359,12 +359,12 @@ CREATE PROCEDURE bajarCategoriaACliente(IN dniCliente INTEGER)
       INSERT INTO Cliente_Tuvo_Categoria
         SET dni = dniCliente, id_categoria = idCategoriaPrevia, fecha_desde = NOW();
     END IF;
-	END //
+  END //
 DELIMITER ;
 --    Analiza si un cliente debe bajar de categoría
 DELIMITER //
 CREATE PROCEDURE verSiBajarCategoriaCliente(IN dniCliente INTEGER)
-	BEGIN
+  BEGIN
     DECLARE debeSubir BOOLEAN;
 
     SELECT (ga.gastado_ultimo_ano / 12) < ca.valor_y INTO debeSubir
@@ -385,12 +385,12 @@ CREATE PROCEDURE verSiBajarCategoriaCliente(IN dniCliente INTEGER)
       IF debeSubir THEN
         call bajarCategoriaACliente(dniCliente);
       END IF;
-	END //
+  END //
 DELIMITER ;
 --    Analiza si los clientes deben bajar de categoria
 DELIMITER //
 CREATE PROCEDURE verSiBajarCategoriaClientes()
-	BEGIN
+  BEGIN
     DECLARE done INT DEFAULT FALSE;
     DECLARE clienteActual INTEGER;
     DECLARE dniClientes CURSOR FOR
@@ -406,14 +406,14 @@ CREATE PROCEDURE verSiBajarCategoriaClientes()
       call verSiBajarCategoriaCliente(clienteActual);
     END LOOP;
     CLOSE dniClientes;
-	END //
+  END //
 DELIMITER ;
 
 -- SP que reacomoda categoria de dniClientes
 DELIMITER //
 CREATE PROCEDURE reacomodarCategoriaClientes()
-	BEGIN
+  BEGIN
     call verSiSubirCategoriaClientes();
     call verSiBajarCategoriaClientes();
-	END //
+  END //
 DELIMITER ;
