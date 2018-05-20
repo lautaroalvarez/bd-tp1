@@ -157,54 +157,65 @@ CREATE TABLE Entrada_A_Atraccion (
 
 SELECT 'CREATING STORED PROCEDURES' AS 'INFO';
 -- Atraccion que mas facturo
+-- Atraccion que mas facturo
 DELIMITER //
 CREATE PROCEDURE atraccionMasFacturo()
-	BEGIN
-	select atr1.nombre from Atraccion atr1 where not exists(
-		select 1 from Atraccion AS atr2, Entrada_A_Atraccion AS entrada1  where
-			atr2.id_atraccion=entrada1.id_atraccion group by id_atraccion having
-				sum(entrada1.precio) > (select sum(entrada2.precio) from Entrada_A_Atraccion AS entrada2 where
-					atr1.id_atraccion=entrada1.id_atraccion ));
-	END //
+  BEGIN
+  select atr1.nombre from Atraccion atr1 where not exists(
+    select 1 from Atraccion atr2, Entrada_A_Atraccion entrada1,Entrada ent  where
+      atr2.id_atraccion=entrada1.id_atraccion and entrada1.id_entrada = ent.id_entrada group by id_atraccion having
+        sum(ent.precio) > (select sum(ent2.precio) from Entrada_A_Atraccion  entrada2, Entrada ent2 where
+          atr1.id_atraccion=entrada1.id_atraccion and entrada2.id_entrada = ent2.id_entrada));
+  END //
 DELIMITER ;
 
--- Parque que mas facturo
+-- Parque que mas facturo 
 DELIMITER //
 CREATE PROCEDURE parqueMasFacturo()
-	BEGIN
-	select par1.nombre from Locacion par1 where par1.tipo='P' and not exists(
-		select 1 from Locacion par2, Entrada_A_Locacion entrada1 where
-			par2.id_locacion=entradaL1.id_locacion group by id_locacion having
-				sum(entrada1.precio) > (select sum(entrada2.precio) from Atraccion atr2,Entrada_A_Locacion entrada2 where
-					par1.id_locacion=entrada2.id_locacion ));
-	END //
+  BEGIN
+  select par1.nombre from Locacion par1 where par1.tipo='P' and not exists(
+    select 1 from Locacion par2, Entrada_A_Locacion entrada1, Entrada ent where
+      par2.id_locacion=entrada1.id_locacion and entrada1.id_entrada = ent.id_entrada group by id_locacion having
+        sum(ent.precio) > (select sum(ent2.precio) from Entrada_A_Locacion entrada2 , Entrada ent2 where
+          par1.id_locacion=entrada2.id_locacion and entrada2.id_entrada = ent2.id_entrada));
+  END //
 DELIMITER ;
 
 
--- Atraccion que mas facturo por parque XX
+-- Atraccion que mas facturo por parque 
 DELIMITER //
 CREATE PROCEDURE atraccionMasFacturoPorParque()
-	BEGIN
-
-	END //
+  BEGIN
+    select par1.nombre,atr1.nombre from Locacion par1 ,Atraccion atr1 where par1.tipo='P' and par1.id_locacion=atr1.id_locacion and
+      not exits(select 1 from Atraccion atr2, Entrada_A_Atraccion entrada1,Entrada ent where
+        atr1.id_locacion=atr2.id_locacion and  atr2.id_atraccion=entrada1.id_atraccion and entrada1.id_entrada = ent.id_entrada agroup by id_atraccion having
+          sum(ent.precio) > (select sum(entrada2.precio) from Entrada_A_Atraccion entrada2,Entrada ent2 where
+            atr1.id_atraccion=entrada2.id_atraccion and entrada2.id_entrada = ent2.id_entrada ));
+  END //
 DELIMITER ;
 -- Facturas adeudadas
 
 DELIMITER //
 CREATE PROCEDURE facturasAdeudadas()
-	BEGIN
-	SELECT * FROM Facturas where  estado='I';
-	END //
+  BEGIN
+  SELECT * FROM Facturas where  estado='I';
+  END //
 DELIMITER ;
 
--- Atracciones mas visitadas por cliente en rango de fecha XX
+-- Atracciones mas visitadas por cliente en rango de fecha 
 
 DELIMITER //
 CREATE PROCEDURE atraccionesPorCliente(IN fechaInicio DATE, IN fechaFin DATE)
-	BEGIN
-
-	END //
+  BEGIN
+    select cl.nombre, atr.nombre from Cliente cl, Atraccion atr where
+      exists( select 1 from Entrada_A_Atraccion entradaA , Entrada entrada where entradaA.id_atraccion = atr.id_atraccion and entrada.id_entrada=entradaA.id_entrada and entrada.id_cliente=cl.id_cliente and entrada.fecha<=fechaFin and fechaInicio<=entrada.fecha ) 
+        and not exists ( select 1 from Atraccion atr2, Entrada_A_Atraccion entrada1,Entrada ent where
+        atr1.id_locacion=atr2.id_locacion and  atr2.id_atraccion=entrada1.id_atraccion and entrada1.id_entrada = ent.id_entrada  and ent.fecha<=fechaFin and fechaInicio<=ent.fecha  group by id_atraccion having
+          sum(ent.precio) > (select sum(entrada2.precio) from Entrada_A_Atraccion entrada2 ,Entrada ent2 where
+            atr1.id_atraccion=entrada2.id_atraccion and entrada2.id_entrada = ent2.id_entrada  and ent2.fecha<=fechaFin and fechaInicio<=ent2.fecha ))
+  END //
 DELIMITER ;
+
 
 -- Empresa organizadora de eventos que tuvo mayor facturacion
 DELIMITER //
