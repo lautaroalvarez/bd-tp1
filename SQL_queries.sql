@@ -48,6 +48,19 @@ CALL equiposPorPais(1);
 SELECT '9 - Atraccion que mas facturo' AS 'INFO';
 CALL atraccionMasFacturo();
 
-*/
+
 SELECT '10 - Parque que mas facturo' AS 'INFO';
 CALL parqueMasFacturo();
+
+
+SELECT '11 - Parque que mas facturo' AS 'INFO';
+CALL atraccionMasFacturoPorParque();
+
+
+SELECT '11 - Facturas adeudadas' AS 'INFO';
+CALL facturasAdeudadas();
+
+
+SELECT '12 - Atracciones mas visitadas por cliente en rango de fecha ' AS 'INFO';
+CALL atraccionesPorCliente('2017-01-15 00:00:00','2018-04-26 00:00:00');
+*/
