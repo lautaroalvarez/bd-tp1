@@ -9,3 +9,27 @@ Se entregan los siguientes archivos:
     \item SQL\_populacion\_tablas.sql \\
     Permite rellenar dicha estructura con datos de prueba e implementa las consultas solicitadas por la cátedra.
 \end{itemize}
+
+\section{Funcionalidades}
+
+\begin{itemize}
+  \item \textbf{Estadísticas: atracción que más facturó, parque que más facturó, atracción que más facturó por parque.} \\
+  SP: \textit{sp1()}
+  \item \textbf{Listado de facturas adeudadas} \\
+  SP: \textit{facturasAdeudadas()}
+  \item \textbf{Para cada cliente las atracciones más visitadas en rango de fechas} \\
+  SP: \textit{atraccionesPorCliente(desde, hasta)} \\
+  Ej: \textit{atraccionesPorCliente('2017-01-30', '2017-05-20')}
+  \item \textbf{Cambios de categorías de cliente en rango de fechas} \\
+  SP: \textit{cambiosCategoriaCliente(dni, desde, hasta)} \\
+  Ej: \textit{cambiosCategoriaCliente(13241345, '2016-12-30', '2017-04-01')}
+  \item \textbf{Atracciones con descuento para cada categoría.} \\
+  SP: \textit{atraccionesDescuentoPorCategoria()}
+  \item \textbf{Empresa organizadora de eventos que tuvo mayor facturación.} \\
+  SP: \textit{empresaMasFacturo()}
+  \item \textbf{Desarrollar un procedimiento almacenado que verifique las categorías y realice el cambio de la misma si es necesario.} \\
+  SP: \textit{sp7()}
+  \item \textbf{Ranking de parques/atracciones con mayor cantidad de visitas en rango de fechas.} \\
+  SP: \textit{rankingParquesAtracciones(desde, hasta)} \\
+  Ej: \textit{rankingParquesAtracciones('2017-01-30', '2017-05-20')} \\
+\end{itemize}

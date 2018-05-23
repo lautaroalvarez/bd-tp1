@@ -156,11 +156,15 @@ CREATE TABLE Entrada_A_Atraccion (
 );
 
 SELECT 'CREATING STORED PROCEDURES' AS 'INFO';
--- Atraccion que mas facturo
+
+-------------------
+-------------- SP-1
+-------------------
 -- Atraccion que mas facturo
 DELIMITER //
 CREATE PROCEDURE atraccionMasFacturo()
   BEGIN
+  SELECT 'Atracción que mas facturó' AS '';
   select atr1.nombre from Atraccion atr1 where not exists(
     select 1 from Atraccion atr2, Entrada_A_Atraccion entrada1,Entrada ent  where
       atr2.id_atraccion=entrada1.id_atraccion and entrada1.id_entrada = ent.id_entrada group by atr2.id_atraccion having
@@ -169,10 +173,11 @@ CREATE PROCEDURE atraccionMasFacturo()
   END //
 DELIMITER ;
 
--- Parque que mas facturo 
+-- Parque que mas facturo
 DELIMITER //
 CREATE PROCEDURE parqueMasFacturo()
   BEGIN
+  SELECT 'Parque que mas facturó' AS '';
   select par1.nombre from Locacion par1 where par1.tipo ='P' and not exists(
     select 1 from Locacion par2, Entrada_A_Locacion entrada1, Entrada ent where
       par2.id_locacion=entrada1.id_locacion and entrada1.id_entrada = ent.id_entrada and par2.tipo ='P' group by par2.id_locacion having
@@ -181,11 +186,11 @@ CREATE PROCEDURE parqueMasFacturo()
   END //
 DELIMITER ;
 
-
--- Atraccion que mas facturo por parque 
+-- Atraccion que mas facturo por parque
 DELIMITER //
 CREATE PROCEDURE atraccionMasFacturoPorParque()
   BEGIN
+  SELECT 'Atracción que mas facturó por parque' AS '';
     select par1.nombre,atr1.nombre from Locacion par1 ,Atraccion atr1 where par1.tipo='P' and par1.id_locacion=atr1.id_locacion and
       not exists(select 1 from Atraccion atr2, Entrada_A_Atraccion entrada1,Entrada ent where
         atr1.id_locacion=atr2.id_locacion and  atr2.id_atraccion=entrada1.id_atraccion and entrada1.id_entrada = ent.id_entrada group by atr2.id_atraccion having
@@ -193,8 +198,20 @@ CREATE PROCEDURE atraccionMasFacturoPorParque()
             atr1.id_atraccion=entrada2.id_atraccion and entrada2.id_entrada = ent2.id_entrada ));
   END //
 DELIMITER ;
--- Facturas adeudadas
 
+DELIMITER //
+CREATE PROCEDURE sp1()
+  BEGIN
+    call atraccionMasFacturo();
+    call parqueMasFacturo();
+    call atraccionMasFacturoPorParque();
+  END //
+DELIMITER ;
+
+-------------------
+-------------- SP-2
+-------------------
+-- Facturas adeudadas
 DELIMITER //
 CREATE PROCEDURE facturasAdeudadas()
   BEGIN
@@ -202,13 +219,15 @@ CREATE PROCEDURE facturasAdeudadas()
   END //
 DELIMITER ;
 
--- Atracciones mas visitadas por cliente en rango de fecha 
-
+-------------------
+-------------- SP-3
+-------------------
+-- Atracciones mas visitadas por cliente en rango de fecha
 DELIMITER //
-CREATE PROCEDURE atraccionesPorCliente(IN fechaInicio DATE, IN fechaFin DATE)
+CREATE PROCEDURE atraccionesPorCliente(IN fechaInicio VARCHAR(10), IN fechaFin VARCHAR(10))
   BEGIN
     select cl.nombre, atr.nombre from Cliente cl, Atraccion atr where
-      exists( select 1 from Entrada_A_Atraccion entradaA , Entrada entrada where entradaA.id_atraccion = atr.id_atraccion and entrada.id_entrada=entradaA.id_entrada and entrada.dni=cl.dni and entrada.fecha<=fechaFin and fechaInicio<=entrada.fecha ) 
+      exists( select 1 from Entrada_A_Atraccion entradaA , Entrada entrada where entradaA.id_atraccion = atr.id_atraccion and entrada.id_entrada=entradaA.id_entrada and entrada.dni=cl.dni and entrada.fecha<=fechaFin and fechaInicio<=entrada.fecha )
         and not exists ( select 1 from Atraccion atr2, Entrada_A_Atraccion entrada1,Entrada ent where
         atr.id_locacion=atr2.id_locacion and  atr2.id_atraccion=entrada1.id_atraccion and entrada1.id_entrada = ent.id_entrada  and ent.fecha<=fechaFin and fechaInicio<=ent.fecha  group by atr2.id_atraccion having
           sum(ent.precio) > (select sum(ent2.precio) from Entrada_A_Atraccion entrada2 ,Entrada ent2 where
@@ -216,7 +235,34 @@ CREATE PROCEDURE atraccionesPorCliente(IN fechaInicio DATE, IN fechaFin DATE)
   END //
 DELIMITER ;
 
+-------------------
+-------------- SP-4
+-------------------
+DELIMITER //
+CREATE PROCEDURE cambiosCategoriaCliente(IN dniCliente INTEGER, IN fecha_desde VARCHAR(10), IN fecha_hasta VARCHAR(10))
+  BEGIN
+    SELECT cat.nombre categoria, ctc.fecha_desde
+      FROM Cliente_Tuvo_Categoria as ctc, Categoria as cat
+      WHERE cat.id_categoria = ctc.id_categoria AND ctc.dni = dniCliente AND ctc.fecha_desde > fecha_desde AND ctc.fecha_desde < fecha_hasta;
+  END //
+DELIMITER ;
 
+-------------------
+-------------- SP-5
+-------------------
+DELIMITER //
+CREATE PROCEDURE atraccionesDescuentoPorCategoria()
+  BEGIN
+    SELECT cat.nombre categoria, atr.nombre atraccion, dea.porcentaje porcentaje_descuento
+      FROM Descuento_En_Atraccion as dea, Categoria as cat, Atraccion as atr
+      WHERE dea.id_categoria = cat.id_categoria AND dea.id_atraccion = atr.id_atraccion
+      ORDER BY cat.orden ASC;
+  END //
+DELIMITER ;
+
+-------------------
+-------------- SP-6
+-------------------
 -- Empresa organizadora de eventos que tuvo mayor facturacion
 DELIMITER //
 CREATE PROCEDURE empresaMasFacturo()
@@ -229,30 +275,9 @@ CREATE PROCEDURE empresaMasFacturo()
   END //
 DELIMITER ;
 
--- Ranking de parques/atracciones con mayor cantidad de visitas en rango de fechas
-DELIMITER //
-CREATE PROCEDURE rankingParquesAtracciones(IN fecha_desde VARCHAR(10), IN fecha_hasta VARCHAR(10))
-  BEGIN
-  (
-    SELECT 'Parque' as tipo, l.nombre as nombre, COUNT(el.id_entrada) visitas
-      FROM Locacion as l, Entrada as en, Entrada_A_Locacion as el
-      WHERE l.tipo = 'P' AND el.id_locacion = l.id_locacion AND en.id_entrada = el.id_entrada AND en.fecha > fecha_desde AND en.fecha < fecha_hasta
-      GROUP BY l.id_locacion
-      LIMIT 0, 5
-  )
-  UNION
-  (
-    SELECT 'Atraccion' as tipo, a.nombre as nombre, COUNT(ea.id_entrada) visitas
-      FROM Atraccion as a, Entrada as en, Entrada_A_Atraccion as ea
-      WHERE ea.id_atraccion = a.id_atraccion AND en.id_entrada = ea.id_entrada AND en.fecha > fecha_desde AND en.fecha < fecha_hasta
-      GROUP BY a.id_atraccion
-      LIMIT 0, 5
-  )
-    ORDER BY visitas
-    DESC LIMIT 0, 5;
-  END //
-DELIMITER ;
-
+-------------------
+-------------- SP-7
+-------------------
 -- Subida de categoría
 --    Sube al cliente de categoria
 DELIMITER //
@@ -367,10 +392,10 @@ CREATE PROCEDURE verSiBajarCategoriaCliente(IN dniCliente INTEGER)
   BEGIN
     DECLARE debeSubir BOOLEAN;
 
-    SELECT (ga.gastado_ultimo_ano / 12) < ca.valor_y INTO debeSubir
+    SELECT (ga.gastado_ultimo_ano / 12) < ca.valor_y AND ca.fecha_desde < DATE_SUB(NOW(), INTERVAL 1 YEAR) INTO debeSubir
       FROM
       (
-        SELECT ctc.dni, ca.valor_y
+        SELECT ctc.dni, ca.valor_y, ctc.fecha_desde
           FROM Cliente_Tuvo_Categoria as ctc, Categoria as ca
           WHERE ctc.id_categoria = ca.id_categoria AND ctc.dni = dniCliente
           ORDER BY ctc.fecha_desde DESC
@@ -411,9 +436,36 @@ DELIMITER ;
 
 -- SP que reacomoda categoria de dniClientes
 DELIMITER //
-CREATE PROCEDURE reacomodarCategoriaClientes()
+CREATE PROCEDURE sp7()
   BEGIN
     call verSiSubirCategoriaClientes();
     call verSiBajarCategoriaClientes();
+  END //
+DELIMITER ;
+
+-------------------
+-------------- SP-8
+-------------------
+-- Ranking de parques/atracciones con mayor cantidad de visitas en rango de fechas
+DELIMITER //
+CREATE PROCEDURE rankingParquesAtracciones(IN fecha_desde VARCHAR(10), IN fecha_hasta VARCHAR(10))
+  BEGIN
+  (
+    SELECT 'Parque' as tipo, l.nombre as nombre, COUNT(el.id_entrada) visitas
+      FROM Locacion as l, Entrada as en, Entrada_A_Locacion as el
+      WHERE l.tipo = 'P' AND el.id_locacion = l.id_locacion AND en.id_entrada = el.id_entrada AND en.fecha > fecha_desde AND en.fecha < fecha_hasta
+      GROUP BY l.id_locacion
+      LIMIT 0, 5
+  )
+  UNION
+  (
+    SELECT 'Atraccion' as tipo, a.nombre as nombre, COUNT(ea.id_entrada) visitas
+      FROM Atraccion as a, Entrada as en, Entrada_A_Atraccion as ea
+      WHERE ea.id_atraccion = a.id_atraccion AND en.id_entrada = ea.id_entrada AND en.fecha > fecha_desde AND en.fecha < fecha_hasta
+      GROUP BY a.id_atraccion
+      LIMIT 0, 5
+  )
+    ORDER BY visitas
+    DESC LIMIT 0, 5;
   END //
 DELIMITER ;
