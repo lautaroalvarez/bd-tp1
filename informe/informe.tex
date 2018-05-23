@@ -1,0 +1,70 @@
+\documentclass[a4paper,10pt]{article}
+
+\usepackage[margin=1in]{geometry} 	% Setea el margen manualmente, todos iguales.
+\usepackage[spanish]{babel} 		% {Con estos dos anda
+\usepackage[utf8]{inputenc} 		% todo lo que es tildes y ñ}
+\usepackage{fancyhdr} 			%{Estos dos son para
+\pagestyle{fancyplain} 			% el header copado}
+\usepackage{color}			% Con esto puedo hacer la matufia de poner en color blanco un texto para engañar al formato
+\usepackage{ulem}
+\usepackage{caratula/caratula}
+\usepackage{hyperref}
+\usepackage{pdfpages}
+\usepackage{graphicx}
+
+
+\lhead{Bases de Datos} 	% {Con esto se usa el header copado. También está \chead para
+\rhead{Trabajo Práctico 1 - Grupo 13} 	% el centro y comandos para el pie de página, buscar fancyhdr}
+
+%%%%%%%
+% Macros  %
+%%%%%%%
+
+% Tupla para hacer MR
+% Uso: \tuple{NombreTabla}{Contenido de la tupla separado por comas}
+% Pone en negrita el nombre de la tabla y envuelve en paréntesis el contenido. Recomiendo usar junto con \pk{} y \fk{} de ser necesario.
+\newcommand{\tuple}[2]{\textbf{#1}(#2) \\}
+% Primary key
+% Uso: \pk{nombreDePK}
+% Subraya la key.
+\newcommand{\pk}[1]{\underline{#1}}
+% Foreign key
+% Uso: \fk{nombreDeFK}
+% Subraya con línea punteada la key.
+\newcommand{\fk}[1]{\dashuline{#1}}
+% Restricción adicional
+% Uso: \ra{Contenido de la restricción}
+% Escribe "RA:" seguido de la restricción. Recomiendo usar junto con \attr{}.
+\newcommand{\ra}[1]{RA: #1 \\}
+% Atributo
+% Uso: \attr{nombreDeAtributo}
+% Pone al atributo en itálica.
+\newcommand{\attr}[1]{\textit{#1}}
+% Nota
+% Uso: \nota{Contenido de la nota}
+% Escribe "Nota:" seguido de la nota. Recomiendo usar junto con \attr{}.
+\newcommand{\nota}[1]{\textit{Nota:} #1 \\}
+
+
+
+\begin{document}
+
+\input{caratula}
+\maketitle
+
+\tableofcontents
+
+\newpage
+
+\input{intro}
+
+\input{der}
+
+\input{relacional}
+
+\newpage
+\input{imple}
+
+\input{conclu}
+
+\end{document}
